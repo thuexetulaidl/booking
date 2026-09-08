@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Cho Thuê Xe Tự Lái</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+
+    <style>
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 1000; }
+        .fab-icon img { width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
+        .fab-icon img:hover { transform: scale(1.1); }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- THANH ĐIỀU HƯỚNG -->
+    <nav class="bg-gray-800 text-white p-4 shadow-md flex justify-between items-center">
+        <div class="font-bold text-xl">🚗 Hệ Thống Đặt Xe</div>
+        <div>
+            <button onclick="switchView('client-view')" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 mr-2">Khách Hàng</button>
+            <button onclick="switchView('owner-view')" class="px-4 py-2 bg-green-600 rounded hover:bg-green-500 font-bold mr-2">Chủ Xe</button>
+            <button onclick="switchView('manager-view')" class="px-4 py-2 bg-purple-600 rounded hover:bg-purple-500">Quản Lý</button>
+        </div>
+    </nav>
+
+    <!-- HỘP THOẠI NHẬP THÔNG TIN KHÁCH HÀNG (MODAL) -->
+    <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl">
+            <h3 class="font-bold text-xl mb-4 text-blue-800">Thông tin đặt xe</h3>
+            <p id="modal-car-name" class="text-gray-600 mb-4 font-semibold"></p>
+            
+            <input type="text" id="customerName" placeholder="Tên khách hàng (*)" class="w-full border p-2 mb-3 rounded focus:ring-2 focus:ring-blue-400">
+            <input type="tel" id="customerPhone" placeholder="Số điện thoại (*)" class="w-full border p-2 mb-3 rounded focus:ring-2 focus:ring-blue-400">
+            
+            <!-- CẬP NHẬT: Ghi chú rõ là không bắt buộc -->
+            <input type="text" id="deliveryAddress" placeholder="Địa chỉ giao xe (Có thể báo sau)" class="w-full border p-2 mb-3 rounded focus:ring-2 focus:ring-blue-400">
+            <input type="text" id="returnAddress" placeholder="Địa chỉ trả xe (Có thể báo sau)" class="w-full border p-2 mb-4 rounded focus:ring-2 focus:ring-blue-400">
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 font-bold">Hủy</button>
+                <button onclick="submitBooking()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold">Xác nhận Đặt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN KHÁCH HÀNG -->
+    <div id="client-view" class="view-section active">
+        <header class="bg-blue-600 text-white text-center p-6 shadow-md">
+            <h1 class="text-3xl font-bold">Thuê Xe Tự Lái - Nhanh Chóng & Chuyên Nghiệp</h1>
+            <p class="mt-2 text-blue-100">Chọn thời gian để kiểm tra xe trống và nhận báo giá</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto mt-6 bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Thời gian nhận xe</label>
+                    <input type="text" id="startTime" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-400 bg-white" placeholder="Chọn ngày giờ...">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Thời gian trả xe</label>
+                    <input type="text" id="endTime" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-400 bg-white" placeholder="Chọn ngày giờ...">
+                </div>
+            </div>
+            <button onclick="searchAvailableCars()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">
+                KIỂM TRA XE
+            </button>
+            <p id="search-msg" class="text-red-500 text-sm mt-2 hidden text-center font-bold">Vui lòng chọn thời gian hợp lệ!</p>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-8 px-4 pb-20">
+            <h2 id="list-title" class="text-2xl font-bold text-gray-800 mb-6">Danh sách xe của chúng tôi</h2>
+            <div id="car-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div class="fab-container">
+            <a href="https://zalo.me/0779779606" target="_blank" class="fab-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1024px-Icon_of_Zalo.svg.png" alt="Zalo"></a>
+            <a href="https://m.me/29024354103822524" target="_blank" class="fab-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Facebook_Messenger_logo_2020.svg/1024px-Facebook_Messenger_logo_2020.svg.png" alt="Messenger"></a>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN CHỦ XE -->
+    <div id="owner-view" class="view-section bg-blue-50 p-8 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-blue-900 mb-6">Trang Dành Cho Chủ Xe</h1>
+            <div class="bg-white p-4 rounded shadow mb-6 flex gap-4">
+                <input type="text" id="ownerIdInput" placeholder="Nhập ID Chủ Xe (VD: 1 hoặc 2)" class="border p-2 rounded w-64">
+                <button onclick="loginOwner()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">Đăng nhập</button>
+            </div>
+            <div class="bg-white rounded-lg shadow overflow-x-auto hidden" id="owner-dashboard">
+                <table class="min-w-full bg-white text-sm">
+                    <thead class="bg-blue-800 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Xe & Khách</th>
+                            <th class="py-3 px-4 text-left">Lịch trình & Địa điểm</th>
+                            <th class="py-3 px-4 text-left">Tổng Tiền</th>
+                            <th class="py-3 px-4 text-left">Trạng Thái</th>
+                            <th class="py-3 px-4 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="owner-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN QUẢN LÝ TỔNG -->
+    <div id="manager-view" class="view-section bg-gray-100 p-8 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Quản Lý Lịch & Thu Cọc</h1>
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full bg-white text-sm">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Xe & Khách</th>
+                            <th class="py-3 px-4 text-left">Lịch trình & Địa điểm</th>
+                            <th class="py-3 px-4 text-left">Tổng Tiền</th>
+                            <th class="py-3 px-4 text-left">Trạng Thái</th>
+                            <th class="py-3 px-4 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manager-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ LOGIC -->
+    <script>
+        const DEPOSIT_AMOUNT = 200000; 
+        let isTimeSelected = false;
+        let currentOwnerCarId = null;
+        let pendingCarSelection = null; 
+
+        const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
+        flatpickr("#startTime", flatpickrConfig);
+        flatpickr("#endTime", flatpickrConfig);
+
+        const cars = [
+            { id: 1, name: "VinFast VF 5 Plus", price: 700000, image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80", ownerChatId: "ĐIỀN_CHAT_ID_CHỦ_XE_1" },
+            { id: 2, name: "Toyota Vios 2022", price: 600000, image: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=800&q=80", ownerChatId: "ĐIỀN_CHAT_ID_CHỦ_XE_2" },
+            { id: 3, name: "Mazda 3 2023", price: 800000, image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80", ownerChatId: "ĐIỀN_CHAT_ID_CHỦ_XE_3" }
+        ];
+
+        if (!localStorage.getItem('bookings')) localStorage.setItem('bookings', JSON.stringify([]));
+
+        function formatDateTime(dateString) {
+            const d = new Date(dateString);
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const DD = String(d.getDate()).padStart(2, '0');
+            const MM = String(d.getMonth() + 1).padStart(2, '0');
+            const YYYY = d.getFullYear();
+            return `${hh}:${mm} ${DD}/${MM}/${YYYY}`;
+        }
+
+        function refreshTables() {
+            renderManagerTable();
+            renderOwnerTable();
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            refreshTables();
+        }
+
+        function calculateRentalDays(startStr, endStr) {
+            const start = new Date(startStr); const end = new Date(endStr);
+            let totalDays = 0;
+            let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+            while (currentDay <= endDay) {
+                let b1Start = new Date(currentDay); b1Start.setHours(6, 0, 0, 0);
+                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
+                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0);
+                let b2End = new Date(currentDay); b2End.setHours(21, 30, 0, 0);
+
+                if (start < b1End && end > b1Start) totalDays += 0.5;
+                if (start < b2End && end > b2Start) totalDays += 0.5;
+                currentDay.setDate(currentDay.getDate() + 1);
+            }
+            return totalDays;
+        }
+
+        function isCarAvailable(carId, checkStart, checkEnd) {
+            const bookings = JSON.parse(localStorage.getItem('bookings'));
+            const start = new Date(checkStart).getTime(); const end = new Date(checkEnd).getTime();
+
+            for (let b of bookings) {
+                if (b.carId === carId && (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc')) {
+                    const bookedStart = new Date(b.startTime).getTime();
+                    const bookedEnd = new Date(b.endTime).getTime();
+                    if (start < bookedEnd && end > bookedStart) return false; 
+                }
+            }
+            return true;
+        }
+
+        async function sendTelegramNotification(chatId, carName, total) {
+            if(chatId.includes("ĐIỀN")) return; 
+            const BOT_TOKEN = "ĐIỀN_TOKEN_BOT_CỦA_BẠN"; 
+            const msg = `🚨 CÓ ĐƠN ĐẶT XE ${carName} MỚI!\n💰 Tổng tiền: ${total.toLocaleString()} đ\nVào web xác nhận ngay!`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: msg })
+            });
+        }
+
+        // ================= LOGIC KHÁCH HÀNG & MODAL =================
+        function renderCars(carArray, showStatus = false) {
+            const list = document.getElementById('car-list'); list.innerHTML = ''; 
+            const startStr = document.getElementById('startTime').value;
+            const endStr = document.getElementById('endTime').value;
+
+            carArray.forEach(car => {
+                let isAvailable = true;
+                let priceHTML = `<p class="text-gray-500 font-medium mt-2">Giá: ${car.price.toLocaleString()} đ / Ngày</p>`;
+                let buttonHTML = `<button onclick="openModal(${car.id})" class="mt-4 w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600 transition">CHỌN THUÊ XE NÀY</button>`;
+                let cardStyle = ""; 
+
+                if (showStatus && isTimeSelected) {
+                    isAvailable = isCarAvailable(car.id, startStr, endStr);
+                    if (isAvailable) {
+                        const rentalDays = calculateRentalDays(startStr, endStr);
+                        const totalCost = rentalDays * car.price;
+                        priceHTML = `
+                            <div class="mt-2 p-3 bg-blue-50 rounded border border-blue-100">
+                                <p class="text-blue-800 font-bold text-lg">Tổng: ${totalCost.toLocaleString()} đ</p>
+                                <p class="text-sm text-blue-600">(Cho ${rentalDays} ngày thuê)</p>
+                            </div>`;
+                    } else {
+                        cardStyle = "opacity-75 grayscale"; 
+                        priceHTML = `
+                            <div class="mt-2 p-3 bg-red-50 rounded border border-red-200">
+                                <p class="text-red-600 font-bold text-lg">Trùng lịch</p>
+                                <p class="text-sm text-red-500">Đã có khách đặt trong khoảng thời gian này</p>
+                            </div>`;
+                        buttonHTML = `<button disabled class="mt-4 w-full bg-gray-400 text-white font-bold py-2 rounded cursor-not-allowed">ĐÃ ĐƯỢC ĐẶT</button>`;
+                    }
+                }
+                list.innerHTML += `
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transition hover:shadow-xl ${cardStyle}">
+                        <img src="${car.image}" alt="${car.name}" class="h-48 w-full object-cover">
+                        <div class="p-5 flex-grow flex flex-col justify-between">
+                            <div><h3 class="text-xl font-bold text-gray-800">${car.name}</h3>${priceHTML}</div>
+                            ${buttonHTML}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function searchAvailableCars() {
+            const start = document.getElementById('startTime').value;
+            const end = document.getElementById('endTime').value;
+            const msg = document.getElementById('search-msg');
+            const startDate = new Date(start); const endDate = new Date(end);
+
+            if (!start || !end || startDate >= endDate) { msg.classList.remove('hidden'); return; }
+            msg.classList.add('hidden'); isTimeSelected = true;
+            document.getElementById('list-title').innerText = "Trạng thái các xe trong thời gian bạn chọn";
+            renderCars(cars, true); 
+        }
+
+        function openModal(carId) {
+            if (!isTimeSelected) {
+                alert("Vui lòng chọn Thời gian nhận và trả xe trước để hệ thống tính giá chính xác!");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            pendingCarSelection = cars.find(c => c.id === carId);
+            document.getElementById('modal-car-name').innerText = `Xe đã chọn: ${pendingCarSelection.name}`;
+            document.getElementById('booking-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+            pendingCarSelection = null;
+        }
+
+        function submitBooking() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const delivery = document.getElementById('deliveryAddress').value.trim();
+            const returnAdd = document.getElementById('returnAddress').value.trim();
+
+            // CẬP NHẬT: Chỉ bắt buộc Tên và Số điện thoại
+            if(!name || !phone) {
+                alert("Vui lòng điền tối thiểu Tên và Số điện thoại để chúng tôi liên hệ!");
+                return;
+            }
+
+            const startStr = document.getElementById('startTime').value;
+            const endStr = document.getElementById('endTime').value;
+            const totalCost = calculateRentalDays(startStr, endStr) * pendingCarSelection.price;
+
+            const newBooking = {
+                id: Date.now().toString(),
+                carId: pendingCarSelection.id,
+                carName: pendingCarSelection.name,
+                customerName: name, 
+                phone: phone,
+                deliveryAddress: delivery, // Sẽ lưu chuỗi trống nếu khách không điền
+                returnAddress: returnAdd,  // Sẽ lưu chuỗi trống nếu khách không điền
+                startTime: startStr,
+                endTime: endStr,
+                totalCost: totalCost,
+                status: 'Chờ chủ xe duyệt'
+            };
+
+            const bookings = JSON.parse(localStorage.getItem('bookings'));
+            bookings.push(newBooking);
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+
+            sendTelegramNotification(pendingCarSelection.ownerChatId, pendingCarSelection.name, totalCost);
+            
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('deliveryAddress').value = '';
+            document.getElementById('returnAddress').value = '';
+            
+            closeModal();
+            alert("Thành công! Chờ chủ xe duyệt và quản lý liên hệ thu cọc.");
+            searchAvailableCars(); 
+        }
+
+        // ================= LOGIC CHỦ XE =================
+        function loginOwner() {
+            const inputId = parseInt(document.getElementById('ownerIdInput').value);
+            if(cars.find(c => c.id === inputId)) {
+                currentOwnerCarId = inputId;
+                document.getElementById('owner-dashboard').classList.remove('hidden');
+                renderOwnerTable();
+            } else alert("Sai ID Xe!");
+        }
+
+        function renderOwnerTable() {
+            if(!currentOwnerCarId) return;
+            const bookings = JSON.parse(localStorage.getItem('bookings')).filter(b => b.carId === currentOwnerCarId);
+            const tbody = document.getElementById('owner-table-body'); tbody.innerHTML = ''; 
+
+            bookings.reverse().forEach(b => {
+                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi';
+                
+                // CẬP NHẬT: Chỉ ẩn duy nhất Số điện thoại. Tên luôn được hiển thị.
+                const phoneDisplay = isConfirmed 
+                    ? `<span class="text-gray-600">${b.phone}</span>`
+                    : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
+                
+                const customerDisplay = `<span class="text-green-600 font-bold">${b.customerName}</span><br>${phoneDisplay}`;
+                
+                // CẬP NHẬT: Địa chỉ luôn hiển thị, nếu trống thì in chữ "Báo sau"
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
+                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+                const addressDisplay = `<span class="text-gray-600">Giao: ${delAdd}</span><br><span class="text-gray-600">Trả: ${retAdd}</span>`;
+
+                const rentalDays = calculateRentalDays(b.startTime, b.endTime); 
+                
+                let btn = '';
+                if (b.status === 'Chờ chủ xe duyệt') {
+                    btn = `<button onclick="ownerApprove('${b.id}')" class="bg-blue-500 text-white px-3 py-1 rounded w-full">Duyệt cho thuê</button>`;
+                } else if (b.status === 'Đã xác nhận') {
+                    btn = `
+                        <button onclick="updateEndTime('${b.id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full">Sửa lịch</button>
+                        <button onclick="finishBooking('${b.id}')" class="bg-gray-600 text-white px-2 py-1 rounded w-full">Thu hồi xe</button>`;
+                } else {
+                    btn = `<span class="text-gray-500 text-sm">Đã thao tác</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4">
+                            <span class="font-bold text-blue-900">${b.carName}</span><br>
+                            ${customerDisplay}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br>
+                            <span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br>
+                            <span class="text-indigo-600 font-bold">Số ngày: ${rentalDays}</span><br>
+                            ${addressDisplay}
+                        </td>
+                        <td class="py-3 px-4 font-bold text-red-500">${b.totalCost.toLocaleString()}đ</td>
+                        <td class="py-3 px-4"><span class="bg-gray-200 px-2 py-1 rounded text-xs">${b.status}</span></td>
+                        <td class="py-3 px-4 text-center">${btn}</td>
+                    </tr>`;
+            });
+        }
+
+        function ownerApprove(id) {
+            const bookings = JSON.parse(localStorage.getItem('bookings'));
+            const idx = bookings.findIndex(b => b.id === id);
+            bookings[idx].status = 'Đợi cọc'; 
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+            refreshTables(); 
+            alert("Đã duyệt! Hệ thống khóa lịch xe này và chờ Quản lý thu cọc.");
+        }
+
+        // ================= LOGIC QUẢN LÝ =================
+        function renderManagerTable() {
+            const bookings = JSON.parse(localStorage.getItem('bookings'));
+            const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
+
+            bookings.reverse().forEach(b => {
+                const rentalDays = calculateRentalDays(b.startTime, b.endTime);
+                
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
+                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+
+                let btn = '';
+                if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm">Đợi chủ xe</span>';
+                else if (b.status === 'Đợi cọc') btn = `<button onclick="confirmDeposit('${b.id}')" class="bg-green-500 text-white px-3 py-1 rounded w-full text-sm font-bold">Thu cọc ${DEPOSIT_AMOUNT.toLocaleString()}đ</button>`;
+                else if (b.status === 'Đã xác nhận') btn = `
+                    <button onclick="updateEndTime('${b.id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full text-sm font-bold">Sửa lịch</button>
+                    <button onclick="finishBooking('${b.id}')" class="bg-gray-600 text-white px-2 py-1 rounded w-full text-sm font-bold">Thu hồi xe</button>`;
+                else btn = '<span class="text-gray-400 text-sm">Đã xong</span>';
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2 px-4">
+                            <span class="font-bold text-blue-900">${b.carName}</span><br>
+                            <span class="text-green-600 font-bold">${b.customerName}</span><br>
+                            <span class="text-gray-600">${b.phone}</span>
+                        </td>
+                        <td class="py-2 px-4">
+                            <span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br>
+                            <span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br>
+                            <span class="text-indigo-600 font-bold">Số ngày: ${rentalDays}</span><br>
+                            <span class="text-gray-600">Giao: ${delAdd}</span><br>
+                            <span class="text-gray-600">Trả: ${retAdd}</span>
+                        </td>
+                        <td class="py-2 px-4">
+                            <span class="font-bold text-red-500">${b.totalCost.toLocaleString()}đ</span><br>
+                            ${b.status === 'Đã xác nhận' ? `<span class="text-xs text-gray-500">Đã cọc: ${DEPOSIT_AMOUNT/1000}k / Còn: ${(b.totalCost - DEPOSIT_AMOUNT).toLocaleString()}đ</span>` : ''}
+                        </td>
+                        <td class="py-2 px-4"><span class="bg-gray-100 border px-2 py-1 text-xs rounded">${b.status}</span></td>
+                        <td class="py-2 px-4 text-center">${btn}</td>
+                    </tr>`;
+            });
+        }
+
+        // ================= HÀNH ĐỘNG CHUNG =================
+        function confirmDeposit(id) {
+            if(confirm("Xác nhận đã thu 200.000đ cọc?")) {
+                const bookings = JSON.parse(localStorage.getItem('bookings'));
+                bookings.find(b => b.id === id).status = 'Đã xác nhận';
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                refreshTables(); 
+                alert("Đã xác nhận! Số điện thoại khách hàng đã hiện lên cho Chủ xe.");
+            }
+        }
+
+        function updateEndTime(id) {
+            const bookings = JSON.parse(localStorage.getItem('bookings'));
+            const b = bookings.find(x => x.id === id);
+            const newTime = prompt("Nhập Thời gian trả xe MỚI (YYYY/MM/DD HH:mm):", b.endTime);
+            if(newTime && !isNaN(new Date(newTime).getTime())) {
+                b.endTime = newTime;
+                b.totalCost = calculateRentalDays(b.startTime, newTime) * cars.find(c => c.id === b.carId).price;
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                refreshTables(); 
+                alert("Đã cập nhật lại lịch và tiền thành công!");
+            }
+        }
+
+        function finishBooking(id) {
+            if(confirm("Xác nhận khách đã trả xe và hoàn tất đơn?")) {
+                const bookings = JSON.parse(localStorage.getItem('bookings'));
+                bookings.find(b => b.id === id).status = 'Đã thu hồi';
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                refreshTables();
+            }
+        }
+
+        window.onload = () => { renderCars(cars, false); };
+    </script>
+</body>
+</html>

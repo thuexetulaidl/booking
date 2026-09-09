@@ -246,9 +246,13 @@ const firebaseConfig = {
                 if (showStatus && isTimeSelected) {
                     isAvailable = isCarAvailable(car.id, startStr, endStr);
                     if (isAvailable) {
-                        const rentalDays = calculateRentalDays(startStr, endStr);
-                        const totalCost = rentalDays * car.price;
-                        priceHTML = `<div class="mt-2 p-3 bg-blue-50 rounded border border-blue-100"><p class="text-blue-800 font-bold text-lg">Tổng: ${totalCost.toLocaleString()} đ</p><p class="text-sm text-blue-600">(Cho ${rentalDays} ngày thuê)</p></div>`;
+                        const rentalData = calculateRentalData(startStr, endStr, car.price);
+                        const noteHTML = rentalData.note ? `<p class="text-xs text-red-500 mt-2 font-bold">${rentalData.note}</p>` : '';
+                        priceHTML = `<div class="mt-2 p-3 bg-blue-50 rounded border border-blue-100">
+                                        <p class="text-blue-800 font-bold text-lg">Tổng: ${rentalData.totalCost.toLocaleString()} đ</p>
+                                        <p class="text-sm text-blue-600">(Cho ${rentalData.days} ngày thuê)</p>
+                                        ${noteHTML}
+                                     </div>`;
                     } else {
                         cardStyle = "opacity-75 grayscale";
                         priceHTML = `<div class="mt-2 p-3 bg-red-50 rounded border border-red-200"><p class="text-red-600 font-bold text-lg">Trùng lịch</p><p class="text-sm text-red-500">Đã có khách đặt trong khoảng thời gian này</p></div>`;
@@ -313,7 +317,9 @@ const firebaseConfig = {
 
             const startStr = document.getElementById('startTime').value;
             const endStr = document.getElementById('endTime').value;
-            const totalCost = calculateRentalDays(startStr, endStr) * pendingCarSelection.price;
+            const rentalData = calculateRentalData(startStr, endStr, pendingCarSelection.price);
+            const totalCost = rentalData.totalCost;
+            // Ở bên dưới phần newBooking, anh có thể thêm: note: rentalData.note
 
             const newBooking = {
                 timestamp: Date.now(),

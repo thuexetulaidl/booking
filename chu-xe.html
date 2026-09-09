@@ -165,7 +165,18 @@ const firebaseConfig = {
 
         let globalBookings = []; let myCars = []; let globalOwners = []; let currentOwnerId = null;
 
-        const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
+        // CẤU HÌNH LỊCH ĐÃ ĐƯỢC NÂNG CẤP
+        const flatpickrConfig = { 
+            enableTime: true, 
+            dateFormat: "Y/m/d H:i", 
+            time_24hr: true, 
+            minuteIncrement: 30, 
+            locale: "vn",
+            disableMobile: true, // Ép điện thoại dùng giao diện web để giữ định dạng 24h và 30 phút
+            minDate: new Date()  // Khóa lịch, không cho phép chọn thời gian trong quá khứ
+        };
+        flatpickr("#startTime", flatpickrConfig);
+        flatpickr("#endTime", flatpickrConfig);
         flatpickr("#blockStartTime", flatpickrConfig); flatpickr("#blockEndTime", flatpickrConfig);
 
         onSnapshot(collection(db, "owners"), (snapshot) => { globalOwners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); });

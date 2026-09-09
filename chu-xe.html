@@ -167,6 +167,14 @@
             
             // XỬ LÝ LẤY TỆP ẢNH TỪ MÁY TÍNH/ĐIỆN THOẠI
             const imageFiles = document.getElementById('newCarImages').files;
+            // KIỂM TRA DUNG LƯỢNG ẢNH (Tối đa 2MB mỗi ảnh)
+            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB tính bằng byte
+            for (let i = 0; i < imageFiles.length; i++) {
+                if (imageFiles[i].size > MAX_FILE_SIZE) {
+                    alert(`Lỗi: Bức ảnh thứ ${i + 1} của bạn quá lớn (${(imageFiles[i].size / (1024*1024)).toFixed(1)}MB). Vui lòng chọn ảnh dưới 2MB để hệ thống tải nhanh hơn!`);
+                    return; // Dừng lại, không cho tải lên
+                }
+            }
 
             if(!brand || !name || !fuel || !transmission || !bodyType || !seats || !price) {
                 alert("Vui lòng điền đủ tất cả các thông tin của xe!"); return;

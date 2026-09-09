@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tổng - Lịch & Thu Cọc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- ==================== LỚP CỬA BẢO VỆ (ĐĂNG NHẬP) ==================== -->
+    <div id="login-screen" class="fixed inset-0 bg-gray-800 flex flex-col items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-2xl text-center w-96">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Đăng Nhập Quản Lý</h2>
+            <p class="text-sm text-gray-500 mb-6">Vui lòng nhập mật khẩu để tiếp tục</p>
+            
+            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu..." class="border p-3 mb-4 w-full rounded focus:ring-2 focus:ring-purple-500 text-center text-lg tracking-widest">
+            <button onclick="window.checkAdminPassword()" class="bg-purple-600 text-white px-6 py-3 rounded font-bold hover:bg-purple-700 w-full transition">Mở Khóa</button>
+            
+            <p id="login-error" class="text-red-500 text-sm mt-3 hidden font-bold">Sai mật khẩu! Vui lòng thử lại.</p>
+        </div>
+    </div>
+
+    <!-- ==================== NỘI DUNG QUẢN LÝ (BỊ ẨN MẶC ĐỊNH) ==================== -->
+    <div id="main-content" class="hidden">
+        <nav class="bg-gray-800 text-white p-4 shadow-md flex justify-between items-center mb-6">
+            <div class="font-bold text-xl">🚗 Hệ Thống Quản Trị</div>
+            <div class="flex gap-2">
+                <a href="quan-ly.html" class="px-4 py-2 bg-purple-600 rounded font-bold hover:bg-purple-500">Quản Lý</a>
+                <a href="chu-xe.html" class="px-4 py-2 bg-green-600 rounded hover:bg-green-500">Chủ Xe</a>
+                <a href="index.html" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Khách Hàng</a>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 pb-12">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Quản Lý Lịch & Thu Cọc</h1>
+            
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full bg-white text-sm">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Xe & Khách</th>
+                            <th class="py-3 px-4 text-left">Lịch trình & Địa điểm</th>
+                            <th class="py-3 px-4 text-left">Tổng Tiền</th>
+                            <th class="py-3 px-4 text-left">Trạng Thái</th>
+                            <th class="py-3 px-4 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manager-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ LOGIC & FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
+            authDomain: "thuexetulai-fcd79.firebaseapp.com",
+            projectId: "thuexetulai-fcd79",
+            storageBucket: "thuexetulai-fcd79.firebasestorage.app",
+            messagingSenderId: "984655156691",
+            appId: "1:984655156691:web:ff57df0de4f5f2ee040b26",
+            measurementId: "G-Q4RFFJ76NT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const DEPOSIT_AMOUNT = 200000; 
+        let globalBookings = [];
+
+        const cars = [
+            { id: 1, name: "VinFast VF 5 Plus", price: 700000 },
+            { id: 2, name: "Toyota Vios 2022", price: 600000 },
+            { id: 3, name: "Mazda 3 2023", price: 800000 }
+        ];
+
+        // HÀM KIỂM TRA MẬT KHẨU
+        window.checkAdminPassword = function() {
+            const passInput = document.getElementById('adminPassword').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            // Bạn có thể đổi '679195' thành mật khẩu bạn muốn
+            if (passInput === '679195') {
+                document.getElementById('login-screen').classList.add('hidden'); // Ẩn màn hình đăng nhập
+                document.getElementById('main-content').classList.remove('hidden'); // Hiện nội dung chính
+            } else {
+                errorMsg.classList.remove('hidden'); // Hiện thông báo lỗi
+            }
+        }
+
+        // Lắng nghe phím Enter để đăng nhập cho nhanh
+        document.getElementById('adminPassword').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.checkAdminPassword();
+            }
+        });
+
+        // LẮNG NGHE SỰ KIỆN TỪ ĐÁM MÂY FIREBASE
+        onSnapshot(collection(db, "bookings"), (snapshot) => {
+            globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
+            globalBookings.sort((a, b) => b.timestamp - a.timestamp);
+            window.renderManagerTable();
+        });
+
+        function formatDateTime(dateString) {
+            const d = new Date(dateString);
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const DD = String(d.getDate()).padStart(2, '0');
+            const MM = String(d.getMonth() + 1).padStart(2, '0');
+            return `${hh}:${mm} ${DD}/${MM}/${d.getFullYear()}`;
+        }
+
+        function calculateRentalDays(startStr, endStr) {
+            const start = new Date(startStr); const end = new Date(endStr);
+            let totalDays = 0;
+            let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+            while (currentDay <= endDay) {
+                let b1Start = new Date(currentDay); b1Start.setHours(6, 0, 0, 0);
+                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
+                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0);
+                let b2End = new Date(currentDay); b2End.setHours(21, 30, 0, 0);
+                if (start < b1End && end > b1Start) totalDays += 0.5;
+                if (start < b2End && end > b2Start) totalDays += 0.5;
+                currentDay.setDate(currentDay.getDate() + 1);
+            }
+            return totalDays;
+        }
+
+        window.renderManagerTable = function() {
+            const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
+
+            globalBookings.forEach(b => {
+                const rentalDays = calculateRentalDays(b.startTime, b.endTime);
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
+                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+
+                let btn = '';
+                if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe...</span>';
+                else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-1 rounded w-full text-sm font-bold hover:bg-green-600">Thu cọc ${DEPOSIT_AMOUNT.toLocaleString()}đ</button>`;
+                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full text-sm font-semibold">Sửa lịch</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-600 text-white px-2 py-1 rounded w-full text-sm font-semibold">Thu hồi xe</button>`;
+                else btn = '<span class="text-gray-400 text-sm">Đã xong</span>';
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2 px-4"><span class="font-bold text-blue-900">${b.carName}</span><br><span class="text-green-600 font-bold">${b.customerName}</span><br><span class="text-gray-600">${b.phone}</span></td>
+                        <td class="py-2 px-4"><span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br><span class="text-indigo-600 font-bold">Số ngày: ${rentalDays}</span><br><span class="text-gray-600">Giao: ${delAdd}</span><br><span class="text-gray-600">Trả: ${retAdd}</span></td>
+                        <td class="py-2 px-4"><span class="font-bold text-red-500">${b.totalCost.toLocaleString()}đ</span><br>${b.status === 'Đã xác nhận' ? `<span class="text-xs text-gray-500">Đã cọc: ${DEPOSIT_AMOUNT/1000}k / Còn: ${(b.totalCost - DEPOSIT_AMOUNT).toLocaleString()}đ</span>` : ''}</td>
+                        <td class="py-2 px-4"><span class="bg-gray-100 border px-2 py-1 text-xs font-semibold rounded">${b.status}</span></td>
+                        <td class="py-2 px-4 text-center">${btn}</td>
+                    </tr>`;
+            });
+        }
+
+        window.confirmDeposit = async function(firebaseId) {
+            if(confirm("Xác nhận đã thu 200.000đ cọc?")) {
+                try {
+                    await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã xác nhận' });
+                    alert("Đã xác nhận! Thông tin khách hàng đã hiện lên cho Chủ xe.");
+                } catch(error) { console.error("Lỗi:", error); }
+            }
+        }
+
+        window.updateEndTime = async function(firebaseId) {
+            const b = globalBookings.find(x => x.firebaseId === firebaseId);
+            const newTime = prompt("Nhập Thời gian trả xe MỚI (YYYY/MM/DD HH:mm):", b.endTime);
+            if(newTime && !isNaN(new Date(newTime).getTime())) {
+                const newTotalCost = calculateRentalDays(b.startTime, newTime) * cars.find(c => c.id === b.carId).price;
+                try {
+                    await updateDoc(doc(db, "bookings", firebaseId), { 
+                        endTime: newTime,
+                        totalCost: newTotalCost
+                    });
+                    alert("Đã cập nhật lại lịch và tiền thành công!");
+                } catch(error) { console.error("Lỗi:", error); }
+            }
+        }
+
+        window.finishBooking = async function(firebaseId) {
+            if(confirm("Xác nhận khách đã trả xe và hoàn tất đơn?")) {
+                try {
+                    await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' });
+                } catch(error) { console.error("Lỗi:", error); }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chủ Xe - Quản Lý Xe & Lịch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thêm thư viện chọn ngày giờ cho chủ xe -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+</head>
+<body class="bg-blue-50 min-h-screen">
+    <nav class="bg-gray-800 text-white p-4 shadow-md flex justify-between items-center mb-6">
+        <div class="font-bold text-xl">🚗 Hệ Thống Chủ Xe</div>
+        <div class="flex gap-2">
+            <a href="chu-xe.html" class="px-4 py-2 bg-green-600 rounded font-bold hover:bg-green-500">Chủ Xe</a>
+            <a href="index.html" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Khách Hàng</a>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 pb-12">
+        <h1 class="text-3xl font-bold text-blue-900 mb-6">Trang Quản Lý Dành Cho Chủ Xe</h1>
+        
+        <div class="bg-white p-4 rounded shadow mb-6 flex gap-4" id="login-section">
+            <input type="text" id="ownerIdInput" placeholder="Nhập ID (SĐT của bạn)" class="border p-2 rounded w-64 focus:ring-2 focus:ring-blue-400">
+            <button onclick="window.loginOwner()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">Đăng nhập</button>
+        </div>
+
+        <div id="owner-workspace" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- KHU VỰC 1: ĐĂNG XE MỚI -->
+                <div class="bg-white p-6 rounded-lg shadow border-t-4 border-green-500">
+                    <h2 class="text-xl font-bold mb-4 text-green-700">Thêm xe mới</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <!-- Hãng xe -->
+    <select id="newCarBrand" class="border p-2 rounded bg-white text-sm">
+        <option value="">-- Hãng Xe --</option>
+        <option value="VinFast">VinFast</option>
+        <option value="Toyota">Toyota</option>
+        <option value="Hyundai">Hyundai</option>
+        <option value="KIA">KIA</option>
+        <option value="Mazda">Mazda</option>
+        <option value="Honda">Honda</option>
+        <option value="Ford">Ford</option>
+        <option value="Mitsubishi">Mitsubishi</option>
+        <option value="Suzuki">Suzuki</option>
+        <option value="Peugeot">Peugeot</option>
+        <option value="MG">MG</option>
+    </select>
+    
+    <!-- Tên xe -->
+    <input type="text" id="newCarName" placeholder="Tên xe (VD: VF 5)" class="border p-2 rounded text-sm">
+    
+    <!-- Loại xe (Nhiên liệu) -->
+    <select id="newCarFuel" class="border p-2 rounded bg-white text-sm">
+        <option value="">-- Nhiên Liệu --</option>
+        <option value="Điện">Điện</option>
+        <option value="Xăng">Xăng</option>
+        <option value="Dầu Diesel">Dầu Diesel</option>
+        <option value="Xăng & Điện (Hybrid)">Xăng & Điện (Hybrid)</option>
+    </select>
+    
+    <!-- Truyền động -->
+    <select id="newCarTransmission" class="border p-2 rounded bg-white text-sm">
+        <option value="">-- Truyền Động --</option>
+        <option value="Tự Động">Tự Động</option>
+        <option value="Số Sàn">Số Sàn</option>
+    </select>
+    
+    <!-- Dòng xe (Kiểu dáng) -->
+    <select id="newCarBodyType" class="border p-2 rounded bg-white text-sm">
+        <option value="">-- Kiểu Dáng --</option>
+        <option value="Mini">Mini</option>
+        <option value="Sedan">Sedan</option>
+        <option value="CUV gầm cao">CUV gầm cao</option>
+        <option value="SUV gầm cao">SUV gầm cao</option>
+        <option value="MPV gầm thấp">MPV gầm thấp</option>
+        <option value="Bán Tải">Bán Tải</option>
+        <option value="Minivan">Minivan</option>
+    </select>
+    
+    <!-- Số chỗ ngồi -->
+    <select id="newCarSeats" class="border p-2 rounded bg-white text-sm">
+        <option value="">-- Chỗ Ngồi --</option>
+        <option value="4">4 chỗ</option>
+        <option value="5">5 chỗ</option>
+        <option value="6">6 chỗ</option>
+        <option value="7">7 chỗ</option>
+        <option value="9">9 chỗ</option>
+    </select>
+    
+    <!-- Giá và Ảnh -->
+    <input type="number" id="newCarPrice" placeholder="Giá/Ngày (VNĐ)" class="border p-2 rounded text-sm">
+    <input type="text" id="newCarImage" placeholder="Link ảnh (URL)" class="border p-2 rounded text-sm">
+</div>
+                    <button onclick="window.addCar()" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 w-full">Đăng Xe Lên Mạng</button>
+                </div>
+
+                <!-- KHU VỰC 2: TỰ KHÓA LỊCH BẬN -->
+                <div class="bg-white p-6 rounded-lg shadow border-t-4 border-yellow-500">
+                    <h2 class="text-xl font-bold mb-4 text-yellow-700">Tự khóa lịch bận của xe</h2>
+                    <p class="text-sm text-gray-600 mb-4">Sử dụng khi bạn cần lấy xe đi việc riêng hoặc cho thuê ngoài.</p>
+                    <div class="flex flex-col gap-3 mb-4">
+                        <select id="blockCarSelect" class="border p-2 rounded focus:ring-2 focus:ring-yellow-400 bg-white">
+                            <option value="">-- Chọn xe của bạn --</option>
+                            <!-- Danh sách xe sẽ được tự động điền vào đây -->
+                        </select>
+                        <input type="text" id="blockStartTime" class="border p-2 rounded bg-white" placeholder="Từ ngày giờ...">
+                        <input type="text" id="blockEndTime" class="border p-2 rounded bg-white" placeholder="Đến ngày giờ...">
+                    </div>
+                    <button onclick="window.blockCarSchedule()" class="bg-yellow-600 text-white px-4 py-2 rounded font-bold hover:bg-yellow-700 w-full">Khóa Lịch Xe Này</button>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐƠN HÀNG ĐẶT XE -->
+            <h2 class="text-xl font-bold mb-4 text-blue-800">Lịch Khách Đặt Xe Của Bạn</h2>
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full bg-white text-sm">
+                    <thead class="bg-blue-800 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Xe & Khách</th>
+                            <th class="py-3 px-4 text-left">Lịch trình & Địa điểm</th>
+                            <th class="py-3 px-4 text-left">Tổng Tiền</th>
+                            <th class="py-3 px-4 text-left">Trạng Thái</th>
+                            <th class="py-3 px-4 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="owner-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        // Thêm deleteDoc để có thể xóa (mở khóa) lịch bận
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // BẠN HÃY DÁN ĐOẠN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
+            authDomain: "thuexetulai-fcd79.firebaseapp.com",
+            projectId: "thuexetulai-fcd79",
+            storageBucket: "thuexetulai-fcd79.firebasestorage.app",
+            messagingSenderId: "984655156691",
+            appId: "1:984655156691:web:ff57df0de4f5f2ee040b26"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let globalBookings = [];
+        let myCars = [];
+        let currentOwnerId = null;
+
+        // Kích hoạt bộ chọn ngày giờ
+        const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
+        flatpickr("#blockStartTime", flatpickrConfig);
+        flatpickr("#blockEndTime", flatpickrConfig);
+
+        onSnapshot(collection(db, "bookings"), (snapshot) => {
+            globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
+            if (currentOwnerId) window.renderOwnerTable();
+        });
+
+        onSnapshot(collection(db, "cars"), (snapshot) => {
+            myCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (currentOwnerId) window.populateCarDropdown(); // Cập nhật danh sách chọn xe
+        });
+
+        window.loginOwner = function() {
+            const inputId = document.getElementById('ownerIdInput').value.trim();
+            if(inputId !== "") {
+                currentOwnerId = inputId;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('owner-workspace').classList.remove('hidden');
+                window.populateCarDropdown();
+                window.renderOwnerTable();
+                alert(`Đăng nhập thành công với ID: ${currentOwnerId}`);
+            } else {
+                alert("Vui lòng nhập ID hợp lệ!");
+            }
+        }
+
+        // HÀM MỚI: Đổ danh sách xe của chủ này vào ô chọn để Khóa lịch
+        window.populateCarDropdown = function() {
+            const dropdown = document.getElementById('blockCarSelect');
+            dropdown.innerHTML = '<option value="">-- Chọn xe của bạn --</option>';
+            
+            const ownerCars = myCars.filter(c => c.ownerId === currentOwnerId);
+            ownerCars.forEach(car => {
+                dropdown.innerHTML += `<option value="${car.id}">${car.name} (Giá: ${car.price.toLocaleString()}đ)</option>`;
+            });
+        }
+
+        window.addCar = async function() {
+            const brand = document.getElementById('newCarBrand').value;
+            const name = document.getElementById('newCarName').value.trim();
+            const fuel = document.getElementById('newCarFuel').value;
+            const transmission = document.getElementById('newCarTransmission').value;
+            const bodyType = document.getElementById('newCarBodyType').value;
+            const seats = document.getElementById('newCarSeats').value;
+            const price = parseInt(document.getElementById('newCarPrice').value);
+            const image = document.getElementById('newCarImage').value.trim();
+
+            if(!brand || !name || !fuel || !transmission || !bodyType || !seats || !price || !image) {
+                alert("Vui lòng điền đủ tất cả các thông tin của xe!"); return;
+            }
+
+            const isDuplicate = myCars.some(car => car.ownerId === currentOwnerId && car.name.toLowerCase() === name.toLowerCase());
+            if (isDuplicate) {
+                alert(`Lỗi: Tên xe "${name}" đã tồn tại. Vui lòng đặt tên khác.`); return;
+            }
+
+            try {
+                await addDoc(collection(db, "cars"), {
+                    ownerId: currentOwnerId, brand: brand, name: name, fuel: fuel,
+                    transmission: transmission, bodyType: bodyType, seats: parseInt(seats),
+                    price: price, image: image
+                });
+                alert("Đăng xe thành công!");
+                // Xóa trắng biểu mẫu
+                document.getElementById('newCarName').value = ''; document.getElementById('newCarPrice').value = ''; document.getElementById('newCarImage').value = '';
+            } catch (error) { console.error("Lỗi:", error); }
+        }
+
+        // HÀM MỚI: Chủ xe tự khóa lịch
+        window.blockCarSchedule = async function() {
+            const carId = document.getElementById('blockCarSelect').value;
+            const startStr = document.getElementById('blockStartTime').value;
+            const endStr = document.getElementById('blockEndTime').value;
+
+            if(!carId || !startStr || !endStr) {
+                alert("Vui lòng chọn xe và điền đầy đủ thời gian Từ ngày - Đến ngày!"); return;
+            }
+
+            const selectedCar = myCars.find(c => c.id === carId);
+
+            try {
+                await addDoc(collection(db, "bookings"), {
+                    timestamp: Date.now(),
+                    carId: selectedCar.id, 
+                    carName: selectedCar.name,
+                    customerName: "Chủ xe khóa lịch (Việc riêng/Thuê ngoài)", 
+                    phone: currentOwnerId, // Lưu lại ID chủ xe để liên hệ
+                    deliveryAddress: "", 
+                    returnAddress: "",
+                    startTime: startStr, 
+                    endTime: endStr, 
+                    totalCost: 0, // Khóa lịch thì doanh thu bằng 0
+                    status: 'Đã khóa lịch' // TRẠNG THÁI MỚI
+                });
+                alert("Đã khóa lịch xe thành công!");
+                document.getElementById('blockStartTime').value = ''; document.getElementById('blockEndTime').value = '';
+            } catch (error) {
+                console.error("Lỗi:", error);
+            }
+        }
+
+        function formatDateTime(dateString) {
+            const d = new Date(dateString);
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
+        window.renderOwnerTable = function() {
+            if(!currentOwnerId) return;
+            const myCarIds = myCars.filter(c => c.ownerId === currentOwnerId).map(c => c.id);
+            const ownerBookings = globalBookings.filter(b => myCarIds.includes(b.carId));
+            
+            // Sắp xếp đơn hàng mới nhất lên đầu
+            ownerBookings.sort((a, b) => b.timestamp - a.timestamp);
+
+            const tbody = document.getElementById('owner-table-body'); tbody.innerHTML = ''; 
+            ownerBookings.forEach(b => {
+                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi';
+                const phoneDisplay = isConfirmed ? `<span class="text-gray-600">${b.phone}</span>` : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
+                
+                // 1. XỬ LÝ ĐỊA ĐIỂM GIAO NHẬN (Thêm mới)
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
+                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+                // Chỉ hiển thị địa chỉ nếu không phải là đơn "Khóa lịch"
+                const addressDisplay = b.status !== 'Đã khóa lịch' 
+                    ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>` 
+                    : '';
+
+                // 2. TÍNH SỐ NGÀY THUÊ (Thêm mới)
+                const rentalDays = calculateRentalDays(b.startTime, b.endTime);
+
+                let btn = '';
+                if (b.status === 'Chờ chủ xe duyệt') {
+                    btn = `<button onclick="window.ownerApprove('${b.firebaseId}')" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt cho thuê</button>`;
+                } else if (b.status === 'Đã khóa lịch') {
+                    btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở Khóa Lịch</button>`;
+                } else {
+                    btn = `<span class="text-gray-500 text-sm font-semibold">Đã thao tác</span>`;
+                }
+
+                const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50 border-b' : 'border-b hover:bg-gray-50';
+
+                // 3. CẬP NHẬT GIAO DIỆN CÁC CỘT HTML
+                tbody.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td class="py-3 px-4">
+                            <span class="font-bold text-blue-900 text-base">${b.carName}</span><br>
+                            <span class="font-bold text-green-700">${b.customerName}</span><br>
+                            ${b.status !== 'Đã khóa lịch' ? phoneDisplay : ''}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="font-semibold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br>
+                            <span class="font-semibold text-red-600">Trả: ${formatDateTime(b.endTime)}</span>
+                            ${addressDisplay}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="text-indigo-600 font-bold text-sm">Số ngày: ${rentalDays}</span><br>
+                            <span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span>
+                        </td>
+                        <td class="py-3 px-4"><span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">${b.status}</span></td>
+                        <td class="py-3 px-4 text-center">${btn}</td>
+                    </tr>`;
+            });
+        }
+
+        window.ownerApprove = async function(firebaseId) {
+            await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' });
+        }
+
+        // HÀM MỚI: Mở khóa lịch (Xóa đơn ảo khỏi Firebase)
+        window.unblockCar = async function(firebaseId) {
+            if(confirm("Bạn có chắc chắn muốn mở khóa lịch cho khung giờ này? Xe sẽ trống để khách hàng đặt trở lại.")) {
+                try {
+                    await deleteDoc(doc(db, "bookings", firebaseId));
+                    alert("Mở khóa thành công!");
+                } catch (error) { console.error("Lỗi:", error); }
+            }
+        }
+    </script>
+</body>
+</html>

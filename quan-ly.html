@@ -104,7 +104,7 @@ const firebaseConfig = {
 
         window.checkAdminPassword = function() {
             const passInput = document.getElementById('adminPassword').value;
-            if (passInput === '123456') {
+            if (passInput === '679195') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } else {
@@ -212,20 +212,75 @@ const firebaseConfig = {
             return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        function calculateRentalDays(startStr, endStr) {
-            const start = new Date(startStr); const end = new Date(endStr);
-            let totalDays = 0; let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        function calculateRentalData(startStr, endStr, carPrice = 0) {
+            const start = new Date(startStr); 
+            const end = new Date(endStr); 
+            let totalDays = 0; 
+            let surcharge = 0;
+            let note = "";
+
+            let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
             let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
             while (currentDay <= endDay) {
-                let b1Start = new Date(currentDay); b1Start.setHours(6, 0, 0, 0);
-                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
-                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0);
-                let b2End = new Date(currentDay); b2End.setHours(21, 30, 0, 0);
-                if (start < b1End && end > b1Start) totalDays += 0.5;
-                if (start < b2End && end > b2Start) totalDays += 0.5;
+                let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); 
+                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0); 
+                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); 
+                let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
+                
+                let dayAdded = 0;
+
+                // 1. Ca sáng (07:00 - 15:00)
+                if (start < b1End && end > b1Start) {
+                    dayAdded += 0.5;
+                }
+
+                // 2. Ca chiều (15:00 - 22:00)
+                if (start < b2End && end > b2Start) {
+                    let ignoreAfternoon = false;
+                    // Luật nhận muộn: Nhận xe sau 21h00 ngày đầu tiên sẽ không tính ca chiều
+                    if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()) {
+                        if (start.getHours() >= 21) {
+                            ignoreAfternoon = true;
+                            note = "*Nhận xe muộn: Phụ phí sẽ do chủ xe thông báo riêng (nếu có).";
+                        }
+                    }
+                    if (!ignoreAfternoon) dayAdded += 0.5;
+                }
+
+                // 3. Luật trả muộn trong ngày (22:00 đến 00:00)
+                if (currentDay.getTime() === endDay.getTime()) {
+                    let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
+                    if (endTimeInHours > 22 && endTimeInHours < 24) {
+                        surcharge += (endTimeInHours - 22) * 100000; // 100k mỗi giờ
+                        note = `*Đã cộng phụ phí trả xe muộn sau 22h: ${surcharge.toLocaleString()}đ`;
+                    }
+                }
+
+                // 4. Luật trả qua ngày (Sau 00:00)
+                if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) {
+                    let endHour = end.getHours();
+                    // Nằm trong khoảng 00:00 đến trước 07:00 sáng
+                    if (endHour >= 0 && endHour < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) {
+                        dayAdded += 0.5;
+                    }
+                }
+
+                totalDays += dayAdded;
                 currentDay.setDate(currentDay.getDate() + 1);
             }
-            return totalDays;
+
+            // Chốt chặn an toàn: Tối thiểu nửa ngày nếu khung giờ nằm ngoài logic trên
+            if (totalDays === 0 && end > start && start.getHours() < 21) {
+                totalDays = 0.5; 
+            }
+
+            return {
+                days: totalDays,
+                surcharge: surcharge,
+                totalCost: (totalDays * carPrice) + surcharge,
+                note: note
+            };
         }
 
         // HÀM RENDER BẢNG ĐƠN HÀNG (GIỮ NGUYÊN)

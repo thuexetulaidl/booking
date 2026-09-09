@@ -145,7 +145,7 @@ const firebaseConfig = {
             let surcharge = 0;
             let notes = []; 
 
-            // 1. KIỂM TRA ĐIỀU KIỆN NHẬN XE MUỘN (Độc lập, tính cho ngày đầu tiên)
+            // 1. Kiểm tra nhận xe muộn (từ 21h trở đi)
             if (start.getHours() >= 21) {
                 notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng.");
             }
@@ -177,7 +177,7 @@ const firebaseConfig = {
                     if (!ignoreAfternoon) dayAdded += 0.5;
                 }
 
-                // 2. KHI TRẢ XE MUỘN TRONG NGÀY (22:00 đến 00:00)
+                // 2. Kiểm tra trả xe muộn trong ngày (22:00 đến 00:00)
                 if (currentDay.getTime() === endDay.getTime()) {
                     let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
                     if (endTimeInHours > 22 && endTimeInHours < 24) {

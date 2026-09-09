@@ -10,7 +10,6 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
 </head>
 <body class="bg-blue-50 min-h-screen">
-    <!-- THANH ĐIỀU HƯỚNG -->
     <nav class="bg-gray-800 text-white p-4 shadow-md flex justify-between items-center mb-6">
         <div class="font-bold text-xl">🚗 Hệ Thống Chủ Xe</div>
         <div class="flex gap-2">
@@ -22,7 +21,6 @@
     <div class="max-w-7xl mx-auto px-4 pb-12">
         <h1 class="text-3xl font-bold text-blue-900 mb-6">Trang Quản Lý Dành Cho Chủ Xe</h1>
         
-        <!-- KHU VỰC ĐĂNG NHẬP -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-4 items-center border-t-4 border-blue-500" id="login-section">
             <div class="flex-grow">
                 <h2 class="text-lg font-bold text-gray-800">Đăng Nhập Quản Lý</h2>
@@ -32,10 +30,7 @@
             <button onclick="window.loginOwner()" class="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700 shadow-md">Vào Trạm</button>
         </div>
 
-        <!-- KHÔNG GIAN LÀM VIỆC CỦA CHỦ XE (ẨN MẶC ĐỊNH) -->
         <div id="owner-workspace" class="hidden">
-            
-            <!-- THẺ THÔNG TIN CHỦ XE HIỂN THỊ TRÊN GÓC (MỚI) -->
             <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded shadow-sm mb-8 flex justify-between items-center">
                 <div>
                     <p class="text-sm text-gray-500">Xin chào Chủ xe,</p>
@@ -47,9 +42,7 @@
                 </div>
             </div>
 
-            <!-- KHU VỰC ĐĂNG XE & KHÓA LỊCH -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- FORM ĐĂNG XE -->
                 <div class="bg-white p-6 rounded-lg shadow border-t-4 border-green-500">
                     <h2 class="text-xl font-bold mb-4 text-green-700">Thêm xe mới vào hệ thống</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -60,23 +53,18 @@
                         <select id="newCarBodyType" class="border p-2 rounded bg-white text-sm"><option value="">-- Kiểu Dáng --</option><option value="Mini">Mini</option><option value="Sedan">Sedan</option><option value="CUV gầm cao">CUV gầm cao</option><option value="SUV gầm cao">SUV gầm cao</option><option value="MPV gầm thấp">MPV gầm thấp</option><option value="Bán Tải">Bán Tải</option><option value="Minivan">Minivan</option></select>
                         <select id="newCarSeats" class="border p-2 rounded bg-white text-sm"><option value="">-- Chỗ Ngồi --</option><option value="4">4 chỗ</option><option value="5">5 chỗ</option><option value="6">6 chỗ</option><option value="7">7 chỗ</option><option value="9">9 chỗ</option></select>
                         <input type="number" id="newCarPrice" placeholder="Giá/Ngày (VNĐ)" class="border p-2 rounded text-sm">
-                        <!-- Tải ảnh -->
                         <div class="col-span-1 md:col-span-1 flex flex-col justify-center">
                             <input type="file" id="newCarImages" multiple accept="image/*" class="text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                         </div>
-                        <p class="text-xs text-gray-500 col-span-2 md:col-span-4 mt-[-10px]">* Chọn từ 1 đến 5 tấm ảnh đẹp nhất của xe (Dưới 2MB/ảnh).</p>
+                        <p class="text-xs text-gray-500 col-span-2 md:col-span-4 mt-[-10px]">* Chọn từ 1 đến 5 tấm ảnh (Dưới 2MB/ảnh).</p>
                     </div>
                     <button id="btn-add-car" onclick="window.addCar()" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 w-full shadow">Đăng Xe Lên Mạng</button>
                 </div>
 
-                <!-- FORM KHÓA LỊCH -->
                 <div class="bg-white p-6 rounded-lg shadow border-t-4 border-yellow-500">
                     <h2 class="text-xl font-bold mb-4 text-yellow-700">Tự khóa lịch bận của xe</h2>
-                    <p class="text-sm text-gray-600 mb-4">Sử dụng khi lấy xe đi việc riêng hoặc cho thuê ngoài hệ thống.</p>
                     <div class="flex flex-col gap-3 mb-4">
-                        <select id="blockCarSelect" class="border p-2 rounded focus:ring-2 focus:ring-yellow-400 bg-white">
-                            <option value="">-- Chọn xe của bạn --</option>
-                        </select>
+                        <select id="blockCarSelect" class="border p-2 rounded focus:ring-2 focus:ring-yellow-400 bg-white"><option value="">-- Chọn xe của bạn --</option></select>
                         <input type="text" id="blockStartTime" class="border p-2 rounded bg-white" placeholder="Từ ngày giờ...">
                         <input type="text" id="blockEndTime" class="border p-2 rounded bg-white" placeholder="Đến ngày giờ...">
                     </div>
@@ -84,7 +72,6 @@
                 </div>
             </div>
 
-            <!-- BẢNG DOANH THU -->
             <h2 class="text-2xl font-bold mb-4 text-purple-800 border-b-2 border-purple-200 pb-2">Danh Sách Xe & Doanh Thu</h2>
             <div class="bg-white rounded-lg shadow overflow-x-auto mb-8">
                 <table class="min-w-full bg-white text-sm">
@@ -100,7 +87,6 @@
                 </table>
             </div>
 
-            <!-- BẢNG ĐƠN HÀNG CHI TIẾT -->
             <h2 class="text-2xl font-bold mb-4 text-blue-800 border-b-2 border-blue-200 pb-2">Lịch Khách Đặt Xe Chi Tiết</h2>
             <div class="bg-white rounded-lg shadow overflow-x-auto">
                 <table class="min-w-full bg-white text-sm">
@@ -119,13 +105,12 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT & FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+        // LƯU Ý: ĐÃ XÓA FIREBASE STORAGE THEO YÊU CẦU
 
-        // BẠN HÃY DÁN ĐOẠN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
+        // ĐIỀN CẤU HÌNH FIREBASE CỦA ANH VÀO ĐÂY
         const firebaseConfig = {
             apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
             authDomain: "thuexetulai-fcd79.firebaseapp.com",
@@ -137,61 +122,36 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        let globalBookings = [];
-        let myCars = [];
-        let globalOwners = []; // Lưu danh sách chủ xe
-        let currentOwnerId = null;
+        let globalBookings = []; let myCars = []; let globalOwners = []; let currentOwnerId = null;
 
         const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
-        flatpickr("#blockStartTime", flatpickrConfig);
-        flatpickr("#blockEndTime", flatpickrConfig);
+        flatpickr("#blockStartTime", flatpickrConfig); flatpickr("#blockEndTime", flatpickrConfig);
 
-        // LẮNG NGHE BẢNG CHỦ XE TỪ QUẢN LÝ
-        onSnapshot(collection(db, "owners"), (snapshot) => {
-            globalOwners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        });
-
+        onSnapshot(collection(db, "owners"), (snapshot) => { globalOwners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); });
         onSnapshot(collection(db, "bookings"), (snapshot) => {
             globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
             if (currentOwnerId) { window.renderOwnerTable(); window.renderMyCarsAndRevenue(); }
         });
-
         onSnapshot(collection(db, "cars"), (snapshot) => {
             myCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             if (currentOwnerId) { window.populateCarDropdown(); window.renderMyCarsAndRevenue(); }
         });
 
-        // HÀM ĐĂNG NHẬP (KIỂM TRA ID)
         window.loginOwner = function() {
             const inputId = document.getElementById('ownerIdInput').value.trim();
-            
-            // Tìm trong danh sách chủ xe xem có ID này không
             const matchedOwner = globalOwners.find(owner => owner.loginId === inputId);
-
             if(matchedOwner) {
-                currentOwnerId = matchedOwner.loginId; // Sử dụng ID đăng nhập làm định danh
-                
-                // Điền thông tin lên thẻ Banner
+                currentOwnerId = matchedOwner.loginId; 
                 document.getElementById('display-owner-name').innerText = matchedOwner.name;
                 document.getElementById('display-owner-phone').innerText = matchedOwner.phone;
                 document.getElementById('display-owner-id').innerText = matchedOwner.loginId;
-
-                // Ẩn form đăng nhập, hiện Không gian làm việc
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('owner-workspace').classList.remove('hidden');
-                
-                window.populateCarDropdown(); 
-                window.renderOwnerTable(); 
-                window.renderMyCarsAndRevenue(); 
-                
-            } else {
-                alert("Sai ID Đăng Nhập! Vui lòng liên hệ Quản Lý để được cấp ID hợp lệ.");
-            }
+                window.populateCarDropdown(); window.renderOwnerTable(); window.renderMyCarsAndRevenue(); 
+            } else { alert("Sai ID Đăng Nhập! Vui lòng liên hệ Quản Lý."); }
         }
 
-        // --- CÁC HÀM XỬ LÝ KHÁC (ĐĂNG XE, KHÓA LỊCH, RENDER) ĐƯỢC GIỮ NGUYÊN ---
         window.populateCarDropdown = function() {
             const dropdown = document.getElementById('blockCarSelect');
             dropdown.innerHTML = '<option value="">-- Chọn xe của bạn --</option>';
@@ -199,6 +159,7 @@
             ownerCars.forEach(car => { dropdown.innerHTML += `<option value="${car.id}">${car.name}</option>`; });
         }
 
+        // HÀM TẢI ẢNH MỚI BẰNG IMGBB API
         window.addCar = async function() {
             const brand = document.getElementById('newCarBrand').value;
             const name = document.getElementById('newCarName').value.trim();
@@ -209,7 +170,6 @@
             const price = parseInt(document.getElementById('newCarPrice').value);
             const imageFiles = document.getElementById('newCarImages').files;
 
-            // KIỂM TRA LỖI NHẬP LIỆU
             if(!brand || !name || !fuel || !transmission || !bodyType || !seats || !price) {
                 alert("Vui lòng điền đủ thông tin xe!"); return;
             }
@@ -217,166 +177,107 @@
                 alert("Vui lòng chọn từ 1 đến 5 bức ảnh!"); return;
             }
 
-            // KIỂM TRA DUNG LƯỢNG ẢNH (Tối đa 2MB/ảnh)
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; 
+            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
             for (let i = 0; i < imageFiles.length; i++) {
-                if (imageFiles[i].size > MAX_FILE_SIZE) {
-                    alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 2MB. Vui lòng giảm kích thước ảnh!`);
-                    return; 
-                }
+                if (imageFiles[i].size > MAX_FILE_SIZE) { alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 2MB!`); return; }
             }
 
-            // KIỂM TRA TRÙNG TÊN XE
             const isDuplicate = myCars.some(car => car.ownerId === currentOwnerId && car.name.toLowerCase() === name.toLowerCase());
             if (isDuplicate) { alert(`Lỗi: Tên xe "${name}" đã tồn tại.`); return; }
 
-            // BẮT ĐẦU TẢI ẢNH
             const btn = document.getElementById('btn-add-car');
-            btn.innerText = "Đang đẩy ảnh lên mây... Vui lòng đợi!";
+            btn.innerText = "Đang kết nối kho ảnh... Vui lòng đợi!";
             btn.disabled = true;
 
             try {
-                // TẠO CƠ CHẾ TẢI SONG SONG (CÙNG LÚC NHIỀU ẢNH)
-                const uploadTasks = Array.from(imageFiles).map(async (file, index) => {
-                    // Đặt tên file ngẫu nhiên để không bị trùng
-                    const storageRef = ref(storage, `cars/${currentOwnerId}_${Date.now()}_${index}`);
-                    await uploadBytes(storageRef, file);
-                    return await getDownloadURL(storageRef); // Trả về link ảnh sau khi tải xong
-                });
+                let uploadedImageUrls = [];
+                // BƯỚC QUAN TRỌNG: ĐIỀN API KEY IMGBB VÀO ĐÂY
+                const IMGBB_API_KEY = "d9bfbfa59f386106cc48b03372be9eb1"; 
+                
+                // Gửi từng ảnh lên ImgBB
+                for (let i = 0; i < imageFiles.length; i++) {
+                    const formData = new FormData();
+                    formData.append("image", imageFiles[i]);
+                    
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    if(result.success) {
+                        uploadedImageUrls.push(result.data.url);
+                    } else {
+                        throw new Error("Lỗi từ hệ thống ImgBB");
+                    }
+                }
 
-                // Chờ tất cả các ảnh được tải xong cùng một lúc
-                const uploadedImageUrls = await Promise.all(uploadTasks);
-
-                // GHI DỮ LIỆU VÀO CƠ SỞ DỮ LIỆU FIRESTORE
+                // Lưu dữ liệu xe vào Firebase kèm danh sách ảnh mới lấy được
                 await addDoc(collection(db, "cars"), {
-                    ownerId: currentOwnerId, 
-                    brand: brand, 
-                    name: name, 
-                    fuel: fuel,
-                    transmission: transmission, 
-                    bodyType: bodyType, 
-                    seats: parseInt(seats),
-                    price: price, 
-                    images: uploadedImageUrls // Mảng chứa 5 đường link ảnh
+                    ownerId: currentOwnerId, brand: brand, name: name, fuel: fuel,
+                    transmission: transmission, bodyType: bodyType, seats: parseInt(seats),
+                    price: price, images: uploadedImageUrls
                 });
                 
-                alert("Đăng xe thành công! Hình ảnh đã được lưu.");
-                
-                // Xóa trắng biểu mẫu
-                document.getElementById('newCarName').value = ''; 
-                document.getElementById('newCarPrice').value = ''; 
-                document.getElementById('newCarImages').value = '';
+                alert("Đăng xe thành công! Kho ảnh đã sẵn sàng.");
+                document.getElementById('newCarName').value = ''; document.getElementById('newCarPrice').value = ''; document.getElementById('newCarImages').value = '';
             } catch (error) { 
-                console.error("Lỗi chi tiết từ Firebase:", error); 
-                alert("Đã xảy ra lỗi khi tải ảnh. Vui lòng ấn phím F12 để xem chi tiết lỗi!"); 
+                console.error(error); alert("Lỗi khi tải ảnh! Vui lòng kiểm tra lại API Key hoặc chọn ảnh khác."); 
             } finally {
-                btn.innerText = "Đăng Xe Lên Mạng"; 
-                btn.disabled = false;
+                btn.innerText = "Đăng Xe Lên Mạng"; btn.disabled = false;
             }
         }
 
         window.blockCarSchedule = async function() {
-            const carId = document.getElementById('blockCarSelect').value;
-            const startStr = document.getElementById('blockStartTime').value;
-            const endStr = document.getElementById('blockEndTime').value;
-
+            const carId = document.getElementById('blockCarSelect').value; const startStr = document.getElementById('blockStartTime').value; const endStr = document.getElementById('blockEndTime').value;
             if(!carId || !startStr || !endStr) { alert("Vui lòng chọn xe và thời gian!"); return; }
             const selectedCar = myCars.find(c => c.id === carId);
-
             try {
                 await addDoc(collection(db, "bookings"), {
                     timestamp: Date.now(), carId: selectedCar.id, carName: selectedCar.name,
-                    customerName: "Chủ xe khóa lịch (Việc riêng)", phone: currentOwnerId, 
-                    deliveryAddress: "", returnAddress: "", startTime: startStr, endTime: endStr, 
-                    totalCost: 0, status: 'Đã khóa lịch' 
+                    customerName: "Chủ xe khóa lịch", phone: currentOwnerId, deliveryAddress: "", returnAddress: "", 
+                    startTime: startStr, endTime: endStr, totalCost: 0, status: 'Đã khóa lịch' 
                 });
-                alert("Khóa lịch xe thành công!");
-                document.getElementById('blockStartTime').value = ''; document.getElementById('blockEndTime').value = '';
+                alert("Khóa lịch xe thành công!"); document.getElementById('blockStartTime').value = ''; document.getElementById('blockEndTime').value = '';
             } catch (error) { console.error(error); }
         }
 
         function formatDateTime(dateString) {
-            const d = new Date(dateString);
-            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            const d = new Date(dateString); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
-
         function calculateRentalDays(startStr, endStr) {
-            const start = new Date(startStr); const end = new Date(endStr);
-            let totalDays = 0; let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-            let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            const start = new Date(startStr); const end = new Date(endStr); let totalDays = 0; let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()); let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
             while (currentDay <= endDay) {
-                let b1Start = new Date(currentDay); b1Start.setHours(6, 0, 0, 0);
-                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
-                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0);
-                let b2End = new Date(currentDay); b2End.setHours(21, 30, 0, 0);
-                if (start < b1End && end > b1Start) totalDays += 0.5;
-                if (start < b2End && end > b2Start) totalDays += 0.5;
-                currentDay.setDate(currentDay.getDate() + 1);
+                let b1Start = new Date(currentDay); b1Start.setHours(6, 0, 0, 0); let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0); let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); let b2End = new Date(currentDay); b2End.setHours(21, 30, 0, 0);
+                if (start < b1End && end > b1Start) totalDays += 0.5; if (start < b2End && end > b2Start) totalDays += 0.5; currentDay.setDate(currentDay.getDate() + 1);
             }
             return totalDays;
         }
 
         window.renderMyCarsAndRevenue = function() {
-            if(!currentOwnerId) return;
-            const myOwnCars = myCars.filter(c => c.ownerId === currentOwnerId);
-            const tbody = document.getElementById('my-cars-table-body'); tbody.innerHTML = '';
-            let totalRevenueAllCars = 0;
-
+            if(!currentOwnerId) return; const myOwnCars = myCars.filter(c => c.ownerId === currentOwnerId); const tbody = document.getElementById('my-cars-table-body'); tbody.innerHTML = ''; let totalRevenueAllCars = 0;
             myOwnCars.forEach(car => {
-                const carBookings = globalBookings.filter(b => b.carId === car.id && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'));
-                const totalRevenue = carBookings.reduce((sum, b) => sum + b.totalCost, 0);
-                totalRevenueAllCars += totalRevenue;
-                
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 px-4 font-bold text-blue-900">${car.name} <br><span class="text-xs text-gray-400 font-normal">Hãng: ${car.brand} - ${car.seats} chỗ</span></td>
-                        <td class="py-3 px-4 font-semibold text-gray-700">${car.price.toLocaleString()}đ</td>
-                        <td class="py-3 px-4 font-bold text-indigo-600">${carBookings.length} lượt</td>
-                        <td class="py-3 px-4 font-bold text-red-500">${totalRevenue.toLocaleString()}đ</td>
-                    </tr>`;
+                const carBookings = globalBookings.filter(b => b.carId === car.id && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi')); const totalRevenue = carBookings.reduce((sum, b) => sum + b.totalCost, 0); totalRevenueAllCars += totalRevenue;
+                tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4 font-bold text-blue-900">${car.name} <br><span class="text-xs text-gray-400 font-normal">Hãng: ${car.brand} - ${car.seats} chỗ</span></td><td class="py-3 px-4 font-semibold text-gray-700">${car.price.toLocaleString()}đ</td><td class="py-3 px-4 font-bold text-indigo-600">${carBookings.length} lượt</td><td class="py-3 px-4 font-bold text-red-500">${totalRevenue.toLocaleString()}đ</td></tr>`;
             });
-            if(myOwnCars.length > 0) {
-                tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="3" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
-            }
+            if(myOwnCars.length > 0) tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="3" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
         }
 
         window.renderOwnerTable = function() {
-            if(!currentOwnerId) return;
-            const myCarIds = myCars.filter(c => c.ownerId === currentOwnerId).map(c => c.id);
-            const ownerBookings = globalBookings.filter(b => myCarIds.includes(b.carId));
-            ownerBookings.sort((a, b) => b.timestamp - a.timestamp);
-
+            if(!currentOwnerId) return; const myCarIds = myCars.filter(c => c.ownerId === currentOwnerId).map(c => c.id); const ownerBookings = globalBookings.filter(b => myCarIds.includes(b.carId)); ownerBookings.sort((a, b) => b.timestamp - a.timestamp);
             const tbody = document.getElementById('owner-table-body'); tbody.innerHTML = ''; 
             ownerBookings.forEach(b => {
-                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi';
-                const phoneDisplay = isConfirmed ? `<span class="text-gray-600">${b.phone}</span>` : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
-                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
-                const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>` : '';
+                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'; const phoneDisplay = isConfirmed ? `<span class="text-gray-600">${b.phone}</span>` : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau'; const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>` : '';
                 const rentalDays = calculateRentalDays(b.startTime, b.endTime);
-
-                let btn = '';
-                if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}')" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt cho thuê</button>`;
-                else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở Khóa Lịch</button>`;
-                else btn = `<span class="text-gray-500 text-sm font-semibold">Đã thao tác</span>`;
-
+                let btn = ''; if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}')" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt</button>`; else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở Khóa</button>`; else btn = `<span class="text-gray-500 text-sm font-semibold">Đã thao tác</span>`;
                 const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50 border-b' : 'border-b hover:bg-gray-50';
-                tbody.innerHTML += `
-                    <tr class="${rowClass}">
-                        <td class="py-3 px-4"><span class="font-bold text-blue-900 text-base">${b.carName}</span><br><span class="font-bold text-green-700">${b.customerName}</span><br>${b.status !== 'Đã khóa lịch' ? phoneDisplay : ''}</td>
-                        <td class="py-3 px-4"><span class="font-semibold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-semibold text-red-600">Trả: ${formatDateTime(b.endTime)}</span>${addressDisplay}</td>
-                        <td class="py-3 px-4"><span class="text-indigo-600 font-bold text-sm">Số ngày: ${rentalDays}</span><br><span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span></td>
-                        <td class="py-3 px-4"><span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">${b.status}</span></td>
-                        <td class="py-3 px-4 text-center">${btn}</td>
-                    </tr>`;
+                tbody.innerHTML += `<tr class="${rowClass}"><td class="py-3 px-4"><span class="font-bold text-blue-900 text-base">${b.carName}</span><br><span class="font-bold text-green-700">${b.customerName}</span><br>${b.status !== 'Đã khóa lịch' ? phoneDisplay : ''}</td><td class="py-3 px-4"><span class="font-semibold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-semibold text-red-600">Trả: ${formatDateTime(b.endTime)}</span>${addressDisplay}</td><td class="py-3 px-4"><span class="text-indigo-600 font-bold text-sm">Số ngày: ${rentalDays}</span><br><span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span></td><td class="py-3 px-4"><span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">${b.status}</span></td><td class="py-3 px-4 text-center">${btn}</td></tr>`;
             });
         }
         
         window.ownerApprove = async function(firebaseId) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' }); }
-        window.unblockCar = async function(firebaseId) {
-            if(confirm("Mở khóa lịch cho khung giờ này?")) {
-                try { await deleteDoc(doc(db, "bookings", firebaseId)); alert("Mở khóa thành công!"); } catch (error) { console.error(error); }
-            }
-        }
+        window.unblockCar = async function(firebaseId) { if(confirm("Mở khóa lịch cho khung giờ này?")) { try { await deleteDoc(doc(db, "bookings", firebaseId)); alert("Mở khóa thành công!"); } catch (error) { console.error(error); } } }
     </script>
 </body>
 </html>

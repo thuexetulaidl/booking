@@ -217,7 +217,8 @@ const firebaseConfig = {
             const end = new Date(endStr); 
             let totalDays = 0; 
             let surcharge = 0;
-            let note = "";
+            // SỬ DỤNG MẢNG ĐỂ LƯU TRỮ NHIỀU THÔNG BÁO CÙNG LÚC
+            let notes = []; 
 
             let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
             let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
@@ -238,11 +239,11 @@ const firebaseConfig = {
                 // 2. Ca chiều (15:00 - 22:00)
                 if (start < b2End && end > b2Start) {
                     let ignoreAfternoon = false;
-                    // Luật nhận muộn: Nhận xe sau 21h00 ngày đầu tiên sẽ không tính ca chiều
                     if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()) {
                         if (start.getHours() >= 21) {
                             ignoreAfternoon = true;
-                            note = "*Nhận xe muộn: Phụ phí sẽ do chủ xe thông báo riêng (nếu có).";
+                            // Đẩy thông báo nhận muộn vào danh sách
+                            notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng.");
                         }
                     }
                     if (!ignoreAfternoon) dayAdded += 0.5;
@@ -252,15 +253,17 @@ const firebaseConfig = {
                 if (currentDay.getTime() === endDay.getTime()) {
                     let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
                     if (endTimeInHours > 22 && endTimeInHours < 24) {
-                        surcharge += (endTimeInHours - 22) * 100000; // 100k mỗi giờ
-                        note = `*Đã cộng phụ phí trả xe muộn sau 22h: ${surcharge.toLocaleString()}đ`;
+                        let rawSurcharge = (endTimeInHours - 22) * 100000;
+                        surcharge += Math.round(rawSurcharge);
+                        // Đẩy thông báo trả muộn vào danh sách
+                        let phutTra = end.getMinutes() === 0 ? '00' : end.getMinutes();
+                        notes.push(`*Phụ phí trả xe muộn (lúc ${end.getHours()}h${phutTra}): ${Math.round(rawSurcharge).toLocaleString()}đ`);
                     }
                 }
 
                 // 4. Luật trả qua ngày (Sau 00:00)
                 if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) {
                     let endHour = end.getHours();
-                    // Nằm trong khoảng 00:00 đến trước 07:00 sáng
                     if (endHour >= 0 && endHour < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) {
                         dayAdded += 0.5;
                     }
@@ -270,7 +273,7 @@ const firebaseConfig = {
                 currentDay.setDate(currentDay.getDate() + 1);
             }
 
-            // Chốt chặn an toàn: Tối thiểu nửa ngày nếu khung giờ nằm ngoài logic trên
+            // Chốt chặn an toàn: Tối thiểu nửa ngày
             if (totalDays === 0 && end > start && start.getHours() < 21) {
                 totalDays = 0.5; 
             }
@@ -279,10 +282,10 @@ const firebaseConfig = {
                 days: totalDays,
                 surcharge: surcharge,
                 totalCost: (totalDays * carPrice) + surcharge,
-                note: note
+                // Gộp tất cả các thông báo lại, phân cách bằng thẻ xuống dòng <br>
+                note: notes.join('<br>') 
             };
         }
-
         // HÀM RENDER BẢNG ĐƠN HÀNG (GIỮ NGUYÊN)
         window.renderManagerTable = function() {
             const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';

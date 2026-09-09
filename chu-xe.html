@@ -209,6 +209,7 @@
             const price = parseInt(document.getElementById('newCarPrice').value);
             const imageFiles = document.getElementById('newCarImages').files;
 
+            // KIỂM TRA LỖI NHẬP LIỆU
             if(!brand || !name || !fuel || !transmission || !bodyType || !seats || !price) {
                 alert("Vui lòng điền đủ thông tin xe!"); return;
             }
@@ -216,8 +217,8 @@
                 alert("Vui lòng chọn từ 1 đến 5 bức ảnh!"); return;
             }
 
-            // KIỂM TRA DUNG LƯỢNG ẢNH
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+            // KIỂM TRA DUNG LƯỢNG ẢNH (Tối đa 2MB/ảnh)
+            const MAX_FILE_SIZE = 2 * 1024 * 1024; 
             for (let i = 0; i < imageFiles.length; i++) {
                 if (imageFiles[i].size > MAX_FILE_SIZE) {
                     alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 2MB. Vui lòng giảm kích thước ảnh!`);
@@ -225,35 +226,52 @@
                 }
             }
 
+            // KIỂM TRA TRÙNG TÊN XE
             const isDuplicate = myCars.some(car => car.ownerId === currentOwnerId && car.name.toLowerCase() === name.toLowerCase());
             if (isDuplicate) { alert(`Lỗi: Tên xe "${name}" đã tồn tại.`); return; }
 
+            // BẮT ĐẦU TẢI ẢNH
             const btn = document.getElementById('btn-add-car');
-            btn.innerText = "Đang tải ảnh... Vui lòng đợi!";
+            btn.innerText = "Đang đẩy ảnh lên mây... Vui lòng đợi!";
             btn.disabled = true;
 
             try {
-                let uploadedImageUrls = [];
-                for (let i = 0; i < imageFiles.length; i++) {
-                    const file = imageFiles[i];
-                    const storageRef = ref(storage, `cars/${currentOwnerId}_${Date.now()}_${i}`);
+                // TẠO CƠ CHẾ TẢI SONG SONG (CÙNG LÚC NHIỀU ẢNH)
+                const uploadTasks = Array.from(imageFiles).map(async (file, index) => {
+                    // Đặt tên file ngẫu nhiên để không bị trùng
+                    const storageRef = ref(storage, `cars/${currentOwnerId}_${Date.now()}_${index}`);
                     await uploadBytes(storageRef, file);
-                    const downloadUrl = await getDownloadURL(storageRef);
-                    uploadedImageUrls.push(downloadUrl);
-                }
+                    return await getDownloadURL(storageRef); // Trả về link ảnh sau khi tải xong
+                });
 
+                // Chờ tất cả các ảnh được tải xong cùng một lúc
+                const uploadedImageUrls = await Promise.all(uploadTasks);
+
+                // GHI DỮ LIỆU VÀO CƠ SỞ DỮ LIỆU FIRESTORE
                 await addDoc(collection(db, "cars"), {
-                    ownerId: currentOwnerId, brand: brand, name: name, fuel: fuel,
-                    transmission: transmission, bodyType: bodyType, seats: parseInt(seats),
-                    price: price, images: uploadedImageUrls
+                    ownerId: currentOwnerId, 
+                    brand: brand, 
+                    name: name, 
+                    fuel: fuel,
+                    transmission: transmission, 
+                    bodyType: bodyType, 
+                    seats: parseInt(seats),
+                    price: price, 
+                    images: uploadedImageUrls // Mảng chứa 5 đường link ảnh
                 });
                 
-                alert("Đăng xe thành công!");
-                document.getElementById('newCarName').value = ''; document.getElementById('newCarPrice').value = ''; document.getElementById('newCarImages').value = '';
+                alert("Đăng xe thành công! Hình ảnh đã được lưu.");
+                
+                // Xóa trắng biểu mẫu
+                document.getElementById('newCarName').value = ''; 
+                document.getElementById('newCarPrice').value = ''; 
+                document.getElementById('newCarImages').value = '';
             } catch (error) { 
-                console.error(error); alert("Lỗi tải ảnh!"); 
+                console.error("Lỗi chi tiết từ Firebase:", error); 
+                alert("Đã xảy ra lỗi khi tải ảnh. Vui lòng ấn phím F12 để xem chi tiết lỗi!"); 
             } finally {
-                btn.innerText = "Đăng Xe Lên Mạng"; btn.disabled = false;
+                btn.innerText = "Đăng Xe Lên Mạng"; 
+                btn.disabled = false;
             }
         }
 

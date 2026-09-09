@@ -287,7 +287,7 @@ const firebaseConfig = {
         window.renderManagerTable = function() {
             const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
             globalBookings.forEach(b => {
-                const rentalDays = calculateRentalDays(b.startTime, b.endTime);
+                const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
                 const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
                 const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>` : '';
@@ -318,7 +318,7 @@ const firebaseConfig = {
         }
         window.updateEndTime = async function(firebaseId) {
             const b = globalBookings.find(x => x.firebaseId === firebaseId);
-            const newTime = prompt("Nhập Thời gian trả xe MỚI (YYYY/MM/DD HH:mm):", b.endTime);
+            const newTotalCost = calculateRentalData(b.startTime, newTime, globalCars.find(c => c.id === b.carId).price).totalCost;
             if(newTime && !isNaN(new Date(newTime).getTime())) {
                 const newTotalCost = calculateRentalDays(b.startTime, newTime) * globalCars.find(c => c.id === b.carId).price;
                 try { await updateDoc(doc(db, "bookings", firebaseId), { endTime: newTime, totalCost: newTotalCost }); } catch(error) { console.error(error); }

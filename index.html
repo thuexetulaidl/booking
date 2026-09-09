@@ -95,7 +95,16 @@ const firebaseConfig = {
         let isTimeSelected = false;
         let pendingCarSelection = null;
 
-        const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
+        // CẤU HÌNH LỊCH ĐÃ ĐƯỢC NÂNG CẤP
+        const flatpickrConfig = { 
+            enableTime: true, 
+            dateFormat: "Y/m/d H:i", 
+            time_24hr: true, 
+            minuteIncrement: 30, 
+            locale: "vn",
+            disableMobile: true, // Ép điện thoại dùng giao diện web để giữ định dạng 24h và 30 phút
+            minDate: new Date()  // Khóa lịch, không cho phép chọn thời gian trong quá khứ
+        };
         flatpickr("#startTime", flatpickrConfig);
         flatpickr("#endTime", flatpickrConfig);
 
@@ -281,10 +290,33 @@ const firebaseConfig = {
             const start = document.getElementById('startTime').value;
             const end = document.getElementById('endTime').value;
             const msg = document.getElementById('search-msg');
-            const startDate = new Date(start); const endDate = new Date(end);
+            
+            if (!start || !end) { 
+                msg.innerText = "Vui lòng chọn đầy đủ thời gian nhận và trả xe!";
+                msg.classList.remove('hidden'); 
+                return; 
+            }
 
-            if (!start || !end || startDate >= endDate) { msg.classList.remove('hidden'); return; }
-            msg.classList.add('hidden'); isTimeSelected = true;
+            const startDate = new Date(start); 
+            const endDate = new Date(end);
+            const now = new Date(); // Lấy thời gian thực tế hiện tại
+
+            // Kiểm tra lỗi 1: Nhận xe trong quá khứ
+            if (startDate < now) {
+                msg.innerText = "Lỗi: Thời gian nhận xe không được nằm trong quá khứ!";
+                msg.classList.remove('hidden'); 
+                return; 
+            }
+
+            // Kiểm tra lỗi 2: Trả xe trước khi nhận xe
+            if (startDate >= endDate) { 
+                msg.innerText = "Lỗi: Thời gian trả xe phải sau thời gian nhận xe!";
+                msg.classList.remove('hidden'); 
+                return; 
+            }
+            
+            msg.classList.add('hidden'); 
+            isTimeSelected = true;
             document.getElementById('list-title').innerText = "Trạng thái các xe trong thời gian bạn chọn";
             window.renderCars(dynamicCars, true);
         }

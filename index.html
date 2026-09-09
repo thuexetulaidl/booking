@@ -161,7 +161,9 @@ const firebaseConfig = {
                 if (currentDay.getTime() === endDay.getTime()) {
                     let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
                     if (endTimeInHours > 22 && endTimeInHours < 24) {
-                        surcharge += (endTimeInHours - 22) * 100000; // 100k mỗi giờ
+                        // Thêm Math.round() để làm tròn số tiền, tránh các số lẻ vô tận
+                        let rawSurcharge = (endTimeInHours - 22) * 100000;
+                        surcharge += Math.round(rawSurcharge); 
                         note = `*Đã cộng phụ phí trả xe muộn sau 22h: ${surcharge.toLocaleString()}đ`;
                     }
                 }

@@ -95,15 +95,32 @@ const firebaseConfig = {
         let isTimeSelected = false;
         let pendingCarSelection = null;
 
-        // CẤU HÌNH LỊCH ĐÃ ĐƯỢC NÂNG CẤP
+        // CẤU HÌNH LỊCH ĐÃ ĐƯỢC NÂNG CẤP VÀ KHÓA CHẶT SỐ PHÚT LẺ
         const flatpickrConfig = { 
             enableTime: true, 
             dateFormat: "Y/m/d H:i", 
             time_24hr: true, 
             minuteIncrement: 30, 
             locale: "vn",
-            disableMobile: true, // Ép điện thoại dùng giao diện web để giữ định dạng 24h và 30 phút
-            minDate: new Date()  // Khóa lịch, không cho phép chọn thời gian trong quá khứ
+            disableMobile: true, 
+            minDate: new Date(),
+            allowInput: false, // Chặn hoàn toàn việc khách dùng bàn phím để gõ số
+            onChange: function(selectedDates, dateStr, instance) {
+                // Nếu khách chọn số phút lẻ, tự động ép về 00 hoặc 30
+                if (selectedDates.length > 0) {
+                    let d = selectedDates[0];
+                    let m = d.getMinutes();
+                    if (m !== 0 && m !== 30) {
+                        // Thuật toán làm tròn: gần 00 thì về 00, gần 30 thì về 30
+                        let roundedMins = (m < 15) ? 0 : ((m < 45) ? 30 : 0);
+                        if (m >= 45) {
+                            d.setHours(d.getHours() + 1); // Tròn lên tiếng tiếp theo
+                        }
+                        d.setMinutes(roundedMins);
+                        instance.setDate(d); // Cập nhật lại giao diện
+                    }
+                }
+            }
         };
         flatpickr("#startTime", flatpickrConfig);
         flatpickr("#endTime", flatpickrConfig);

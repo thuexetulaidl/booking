@@ -187,12 +187,15 @@
                 if (b.status === 'Đã xác nhận') statusColor = 'bg-green-100 text-green-800 border-green-300';
                 if (b.status === 'Đã thu hồi') statusColor = 'bg-gray-200 text-gray-600 border-gray-300';
                 
-                const routeInfo = b.route ? `<p class="text-sm text-gray-600 mt-1">Lộ trình: <span class="font-semibold">${b.route}</span></p>` : '';
+                const routeInfo = b.route ? `<p class="text-sm text-gray-600 mt-3">Lộ trình: <span class="font-semibold">${b.route}</span></p>` : '';
                 
-                // TÍNH TOÁN HIỂN THỊ CHI TIẾT TÀI CHÍNH
+                // BỔ SUNG ĐỊA CHỈ GIAO VÀ TRẢ XE
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
+                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+                
                 const depositPaid = b.bookingDeposit || 200000;
                 let remainingRental = b.totalCost - depositPaid;
-                if (remainingRental < 0) remainingRental = 0; // Tránh số âm nếu cọc lớn hơn tiền thuê
+                if (remainingRental < 0) remainingRental = 0; 
                 
                 const secDepAmount = b.securityDepositAmount || 0;
                 let secMethodText = "Chưa rõ";
@@ -201,12 +204,23 @@
 
                 html += `
                     <div class="border-2 p-4 rounded-lg shadow-sm ${statusColor}">
-                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-3 gap-2">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2">
                             <h4 class="font-black text-lg uppercase">${b.carName}</h4>
                             <span class="px-3 py-1 rounded-full text-xs font-black uppercase bg-white bg-opacity-50 shadow-sm">${b.status}</span>
                         </div>
-                        <p class="text-sm text-gray-800">Lấy xe: <span class="font-bold">${formatDateTime(b.startTime)}</span></p>
-                        <p class="text-sm text-gray-800">Trả xe: <span class="font-bold">${formatDateTime(b.endTime)}</span></p>
+                        
+                        <!-- KHỐI HIỂN THỊ THỜI GIAN VÀ ĐỊA ĐIỂM CHI TIẾT -->
+                        <div class="space-y-2 mb-2">
+                            <div>
+                                <p class="text-sm text-gray-800">Lấy xe: <span class="font-bold">${formatDateTime(b.startTime)}</span></p>
+                                <p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Giao tại: <span class="font-semibold">${delAdd}</span></p>
+                            </div>
+                            <div class="pt-2">
+                                <p class="text-sm text-gray-800">Trả xe: <span class="font-bold">${formatDateTime(b.endTime)}</span></p>
+                                <p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Trả tại: <span class="font-semibold">${retAdd}</span></p>
+                            </div>
+                        </div>
+                        
                         ${routeInfo}
                         
                         <div class="mt-4 pt-3 border-t border-gray-300 border-opacity-50 text-sm">

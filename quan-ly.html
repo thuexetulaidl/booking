@@ -288,12 +288,17 @@ const firebaseConfig = {
         }
         // HÀM RENDER BẢNG ĐƠN HÀNG (GIỮ NGUYÊN)
         window.renderManagerTable = function() {
-            const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
+            const tbody = document.getElementById('manager-table-body'); 
+            tbody.innerHTML = '';
+            
             globalBookings.forEach(b => {
                 const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
                 const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
                 const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
-                const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>` : '';
+                
+                // BỔ SUNG HIỂN THỊ LỘ TRÌNH ĐI XA HOẶC NỘI THÀNH
+                const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-2 shadow-sm">🚗 Lộ trình: ${b.route}</span>` : '';
+                const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
 
                 let btn = '';
                 if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe...</span>';

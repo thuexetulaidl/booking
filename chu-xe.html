@@ -233,10 +233,13 @@ const firebaseConfig = {
                 alert("Vui lòng chọn từ 1 đến 5 bức ảnh!"); return;
             }
 
-            const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-            for (let i = 0; i < imageFiles.length; i++) {
-                if (imageFiles[i].size > MAX_FILE_SIZE) { alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 2MB!`); return; }
-            }
+            const MAX_FILE_SIZE = 32 * 1024 * 1024; 
+for (let i = 0; i < imageFiles.length; i++) {
+    if (imageFiles[i].size > MAX_FILE_SIZE) {
+        alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 32MB. Vui lòng chọn ảnh nhỏ hơn!`);
+        return; 
+    }
+}
 
             const isDuplicate = myCars.some(car => car.ownerId === currentOwnerId && car.name.toLowerCase() === name.toLowerCase());
             if (isDuplicate) { alert(`Lỗi: Tên xe "${name}" đã tồn tại.`); return; }

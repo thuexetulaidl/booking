@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Trị Hệ Thống - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     
@@ -21,7 +18,6 @@
 
     <div class="max-w-7xl mx-auto px-4 pb-12">
         
-        <!-- MÀN HÌNH ĐĂNG NHẬP -->
         <div id="login-section" class="bg-white p-8 rounded-lg shadow-xl max-w-md mx-auto mt-20 border-t-4 border-red-600 text-center">
             <h2 class="text-2xl font-black text-gray-800 mb-2">Đăng Nhập Quản Trị Viên</h2>
             <p class="text-sm text-gray-500 mb-6">Vui lòng nhập mã bảo mật để truy cập hệ thống</p>
@@ -29,10 +25,7 @@
             <button onclick="window.loginAdmin()" class="bg-red-700 text-white px-8 py-3 rounded-lg font-bold hover:bg-red-800 shadow-md w-full text-lg">Đăng Nhập</button>
         </div>
 
-        <!-- KHÔNG GIAN LÀM VIỆC (ẨN TRƯỚC KHI ĐĂNG NHẬP) -->
         <div id="admin-workspace" class="hidden">
-            
-            <!-- CÁC NÚT MỞ POPUP (GỌN GÀNG) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <button onclick="window.openOwnerModal()" class="bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1">
                     👥 Quản Lý Tài Khoản Chủ Xe
@@ -44,7 +37,6 @@
 
             <h1 class="text-3xl font-black text-red-900 mb-6 border-b-2 border-red-200 pb-2">Trạm Quản Lý Đơn Hàng & Thu Cọc</h1>
             
-            <!-- BẢNG ĐƠN HÀNG LUÔN HIỂN THỊ -->
             <div class="bg-white rounded-lg shadow-xl overflow-x-auto border border-gray-200">
                 <table class="min-w-full bg-white text-sm">
                     <thead class="bg-red-800 text-white">
@@ -62,81 +54,42 @@
         </div>
     </div>
 
-    <!-- ================= CÁC CỬA SỔ POPUP (MODAL) ================= -->
-
-    <!-- MODAL 1: QUẢN LÝ CHỦ XE (CẤP ID & XÓA) -->
+    <!-- MODAL QUẢN LÝ CHỦ XE -->
     <div id="modal-manage-owners" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-indigo-700 p-4 flex justify-between items-center text-white">
                 <h2 class="text-xl font-bold">Quản Lý Tài Khoản Chủ Xe</h2>
                 <button onclick="window.closeOwnerModal()" class="text-3xl font-bold hover:text-indigo-200 leading-none">&times;</button>
             </div>
-            
             <div class="p-6 overflow-y-auto flex-grow bg-gray-50">
-                <!-- Form cấp ID -->
                 <div class="bg-white p-5 rounded-lg shadow border border-gray-200 mb-6">
                     <h3 class="font-bold text-indigo-800 mb-4 text-lg">Cấp ID mới cho Chủ xe</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <input type="text" id="newOwnerName" placeholder="Tên chủ xe" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50">
                         <input type="tel" id="newOwnerPhone" placeholder="Số điện thoại" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50">
-                        <input type="text" id="newOwnerId" placeholder="Mã ID đăng nhập (Tự tạo)" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50 font-bold text-indigo-700">
+                        <input type="text" id="newOwnerId" placeholder="Mã ID đăng nhập" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50 font-bold text-indigo-700">
                     </div>
                     <button onclick="window.createOwner()" class="bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 shadow w-full md:w-auto">Cấp Tài Khoản</button>
                 </div>
-
-                <!-- Danh sách chủ xe -->
                 <h3 class="font-bold text-gray-800 mb-3 text-lg">Danh sách Chủ xe hiện tại</h3>
                 <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-100 text-gray-700">
-                            <tr>
-                                <th class="py-3 px-4 text-left">Tên Chủ Xe</th>
-                                <th class="py-3 px-4 text-left">Số Điện Thoại</th>
-                                <th class="py-3 px-4 text-left">ID Đăng Nhập</th>
-                                <th class="py-3 px-4 text-center">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="owners-list-body" class="divide-y divide-gray-100"></tbody>
-                    </table>
+                    <table class="min-w-full text-sm"><thead class="bg-gray-100 text-gray-700"><tr><th class="py-3 px-4 text-left">Tên Chủ Xe</th><th class="py-3 px-4 text-left">Số Điện Thoại</th><th class="py-3 px-4 text-left">ID Đăng Nhập</th><th class="py-3 px-4 text-center">Thao tác</th></tr></thead><tbody id="owners-list-body" class="divide-y divide-gray-100"></tbody></table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: BÁO CÁO THỐNG KÊ -->
+    <!-- MODAL THỐNG KÊ -->
     <div id="modal-statistics" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-teal-700 p-4 flex justify-between items-center text-white">
                 <h2 class="text-xl font-bold">Thống Kê Kinh Doanh Từng Chủ Xe</h2>
                 <button onclick="window.closeStatsModal()" class="text-3xl font-bold hover:text-teal-200 leading-none">&times;</button>
             </div>
-            
             <div class="p-6 overflow-y-auto flex-grow bg-gray-50">
                 <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-teal-100 text-teal-900 border-b-2 border-teal-200">
-                            <tr>
-                                <th class="py-4 px-4 text-left font-bold text-base">Tên Chủ Xe (ID)</th>
-                                <th class="py-4 px-4 text-center font-bold text-base">Số lượng xe</th>
-                                <th class="py-4 px-4 text-center font-bold text-base">Tổng số cuốc (Đã hoàn thành)</th>
-                                <th class="py-4 px-4 text-right font-bold text-base">Tổng doanh thu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stats-table-body" class="divide-y divide-gray-100"></tbody>
-                    </table>
+                    <table class="min-w-full text-sm"><thead class="bg-teal-100 text-teal-900 border-b-2 border-teal-200"><tr><th class="py-4 px-4 text-left font-bold">Tên Chủ Xe (ID)</th><th class="py-4 px-4 text-center font-bold">Số lượng xe</th><th class="py-4 px-4 text-center font-bold">Tổng số cuốc (Đã xong)</th><th class="py-4 px-4 text-right font-bold">Tổng doanh thu</th></tr></thead><tbody id="stats-table-body" class="divide-y divide-gray-100"></tbody></table>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL SỬA LỊCH TRẢ XE (CŨ) -->
-    <div id="modal-update-time" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <h3 class="font-bold text-lg mb-4 text-gray-800">Cập nhật giờ khách trả xe thực tế</h3>
-            <input type="text" id="newEndTime" class="w-full border p-3 rounded mb-4 focus:ring-2 focus:ring-yellow-400" placeholder="Chọn ngày giờ trả xe mới...">
-            <div class="flex justify-end gap-2">
-                <button onclick="window.closeUpdateModal()" class="bg-gray-400 text-white px-4 py-2 rounded font-bold">Hủy</button>
-                <button id="btn-save-time" class="bg-yellow-500 text-white px-4 py-2 rounded font-bold shadow">Lưu & Tính lại</button>
             </div>
         </div>
     </div>
@@ -145,155 +98,69 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // CẤU HÌNH FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
-            authDomain: "thuexetulai-fcd79.firebaseapp.com",
-            projectId: "thuexetulai-fcd79",
-            storageBucket: "thuexetulai-fcd79.firebasestorage.app",
-            messagingSenderId: "984655156691",
-            appId: "1:984655156691:web:ff57df0de4f5f2ee040b26"
+            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk", authDomain: "thuexetulai-fcd79.firebaseapp.com",
+            projectId: "thuexetulai-fcd79", storageBucket: "thuexetulai-fcd79.firebasestorage.app",
+            messagingSenderId: "984655156691", appId: "1:984655156691:web:ff57df0de4f5f2ee040b26"
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let globalBookings = []; let globalCars = []; let globalOwners = [];
-        let currentEditingId = null;
 
-        flatpickr("#newEndTime", { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" });
+        onSnapshot(collection(db, "owners"), (snapshot) => { globalOwners = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); window.renderOwnersList(); window.renderStatistics(); });
+        onSnapshot(collection(db, "cars"), (snapshot) => { globalCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); window.renderStatistics(); });
+        onSnapshot(collection(db, "bookings"), (snapshot) => { globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); globalBookings.sort((a, b) => b.timestamp - a.timestamp); window.renderManagerTable(); window.renderStatistics(); });
 
-        // TẢI DỮ LIỆU THỜI GIAN THỰC TỪ FIREBASE
-        onSnapshot(collection(db, "owners"), (snapshot) => { 
-            globalOwners = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); 
-            window.renderOwnersList();
-            window.renderStatistics();
-        });
-        onSnapshot(collection(db, "cars"), (snapshot) => { 
-            globalCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
-            window.renderStatistics();
-        });
-        onSnapshot(collection(db, "bookings"), (snapshot) => {
-            globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
-            globalBookings.sort((a, b) => b.timestamp - a.timestamp);
-            window.renderManagerTable();
-            window.renderStatistics();
-        });
-
-        // 1. HỆ THỐNG ĐĂNG NHẬP
         window.loginAdmin = function() {
             const pass = document.getElementById('adminPassword').value;
-            if (pass === "679195") {
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('admin-workspace').classList.remove('hidden');
-            } else {
-                alert("Mã PIN không chính xác!");
-            }
+            if (pass === "1122") { document.getElementById('login-section').classList.add('hidden'); document.getElementById('admin-workspace').classList.remove('hidden'); } 
+            else { alert("Mã PIN không chính xác!"); }
         }
 
-        // 2. MỞ / ĐÓNG CÁC POPUP
         window.openOwnerModal = function() { document.getElementById('modal-manage-owners').classList.remove('hidden'); }
         window.closeOwnerModal = function() { document.getElementById('modal-manage-owners').classList.add('hidden'); }
         window.openStatsModal = function() { document.getElementById('modal-statistics').classList.remove('hidden'); }
         window.closeStatsModal = function() { document.getElementById('modal-statistics').classList.add('hidden'); }
 
-        // 3. XỬ LÝ CHỦ XE (CẤP ID VÀ XÓA)
         window.createOwner = async function() {
-            const name = document.getElementById('newOwnerName').value.trim();
-            const phone = document.getElementById('newOwnerPhone').value.trim();
-            const loginId = document.getElementById('newOwnerId').value.trim();
-            
-            if(!name || !phone || !loginId) { alert("Vui lòng nhập đủ thông tin Chủ xe!"); return; }
-            const isExist = globalOwners.some(o => o.loginId === loginId);
-            if(isExist) { alert("Mã ID này đã tồn tại, vui lòng chọn mã khác!"); return; }
-
-            try {
-                await addDoc(collection(db, "owners"), { name: name, phone: phone, loginId: loginId });
-                alert("Cấp ID Chủ xe thành công!");
-                document.getElementById('newOwnerName').value = ''; document.getElementById('newOwnerPhone').value = ''; document.getElementById('newOwnerId').value = '';
-            } catch (error) { console.error(error); alert("Lỗi khi tạo ID!"); }
+            const name = document.getElementById('newOwnerName').value.trim(); const phone = document.getElementById('newOwnerPhone').value.trim(); const loginId = document.getElementById('newOwnerId').value.trim();
+            if(!name || !phone || !loginId) { alert("Vui lòng nhập đủ thông tin!"); return; }
+            if(globalOwners.some(o => o.loginId === loginId)) { alert("Mã ID này đã tồn tại!"); return; }
+            try { await addDoc(collection(db, "owners"), { name: name, phone: phone, loginId: loginId }); alert("Cấp ID thành công!"); document.getElementById('newOwnerName').value = ''; document.getElementById('newOwnerPhone').value = ''; document.getElementById('newOwnerId').value = ''; } 
+            catch (error) { console.error(error); alert("Lỗi khi tạo ID!"); }
         }
 
         window.deleteOwner = async function(firebaseId, name) {
-            if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa chủ xe "${name}" khỏi hệ thống?`)) {
-                try {
-                    await deleteDoc(doc(db, "owners", firebaseId));
-                    alert("Đã xóa chủ xe!");
-                } catch (error) { console.error(error); }
-            }
+            if(confirm(`CẢNH BÁO: Xóa chủ xe "${name}"?`)) { try { await deleteDoc(doc(db, "owners", firebaseId)); alert("Đã xóa chủ xe!"); } catch (error) { console.error(error); } }
         }
 
         window.renderOwnersList = function() {
             const tbody = document.getElementById('owners-list-body'); tbody.innerHTML = '';
-            globalOwners.forEach(owner => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-indigo-50 transition">
-                        <td class="py-3 px-4 font-bold text-gray-800">${owner.name}</td>
-                        <td class="py-3 px-4 text-gray-600">${owner.phone}</td>
-                        <td class="py-3 px-4 font-bold text-indigo-600">${owner.loginId}</td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="window.deleteOwner('${owner.firebaseId}', '${owner.name}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm font-bold hover:bg-red-600 shadow">Xóa</button>
-                        </td>
-                    </tr>`;
-            });
+            globalOwners.forEach(owner => { tbody.innerHTML += `<tr class="hover:bg-indigo-50"><td class="py-3 px-4 font-bold text-gray-800">${owner.name}</td><td class="py-3 px-4 text-gray-600">${owner.phone}</td><td class="py-3 px-4 font-bold text-indigo-600">${owner.loginId}</td><td class="py-3 px-4 text-center"><button onclick="window.deleteOwner('${owner.firebaseId}', '${owner.name}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm font-bold shadow">Xóa</button></td></tr>`; });
         }
 
-        // 4. BÁO CÁO THỐNG KÊ KINH DOANH
         window.renderStatistics = function() {
-            const tbody = document.getElementById('stats-table-body'); tbody.innerHTML = '';
-            let superTotalRevenue = 0;
-
+            const tbody = document.getElementById('stats-table-body'); tbody.innerHTML = ''; let superTotal = 0;
             globalOwners.forEach(owner => {
-                // Lọc xe của chủ này
-                const ownerCars = globalCars.filter(c => c.ownerId === owner.loginId);
-                const carIds = ownerCars.map(c => c.id);
-                
-                // Lọc đơn hàng hợp lệ (Đã xác nhận hoặc Đã thu hồi)
+                const ownerCars = globalCars.filter(c => c.ownerId === owner.loginId); const carIds = ownerCars.map(c => c.id);
                 const ownerBookings = globalBookings.filter(b => carIds.includes(b.carId) && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'));
-                
-                // Tính tổng doanh thu
-                const totalRevenue = ownerBookings.reduce((sum, b) => sum + b.totalCost, 0);
-                superTotalRevenue += totalRevenue;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-teal-50 transition">
-                        <td class="py-4 px-4">
-                            <span class="font-black text-gray-800 text-base">${owner.name}</span><br>
-                            <span class="text-xs font-bold text-teal-600 bg-teal-100 px-2 py-1 rounded">ID: ${owner.loginId}</span>
-                        </td>
-                        <td class="py-4 px-4 text-center font-bold text-gray-700 text-lg">${ownerCars.length} <span class="text-xs font-normal text-gray-500">xe</span></td>
-                        <td class="py-4 px-4 text-center font-bold text-blue-600 text-lg">${ownerBookings.length} <span class="text-xs font-normal text-gray-500">cuốc</span></td>
-                        <td class="py-4 px-4 text-right font-black text-red-600 text-xl">${totalRevenue.toLocaleString()}đ</td>
-                    </tr>`;
+                const totalRevenue = ownerBookings.reduce((sum, b) => sum + b.totalCost, 0); superTotal += totalRevenue;
+                tbody.innerHTML += `<tr class="hover:bg-teal-50"><td class="py-4 px-4"><span class="font-black text-gray-800">${owner.name}</span><br><span class="text-xs font-bold text-teal-600 bg-teal-100 px-2 py-1 rounded">ID: ${owner.loginId}</span></td><td class="py-4 px-4 text-center font-bold text-gray-700">${ownerCars.length} xe</td><td class="py-4 px-4 text-center font-bold text-blue-600">${ownerBookings.length} cuốc</td><td class="py-4 px-4 text-right font-black text-red-600">${totalRevenue.toLocaleString()}đ</td></tr>`;
             });
-
-            // Thêm dòng tổng cộng
-            if (globalOwners.length > 0) {
-                tbody.innerHTML += `
-                    <tr class="bg-teal-600 text-white">
-                        <td colspan="3" class="py-5 px-4 font-black text-right text-lg uppercase tracking-wider">Tổng Doanh Thu Toàn Hệ Thống:</td>
-                        <td class="py-5 px-4 text-right font-black text-2xl">${superTotalRevenue.toLocaleString()}đ</td>
-                    </tr>`;
-            }
+            if (globalOwners.length > 0) tbody.innerHTML += `<tr class="bg-teal-600 text-white"><td colspan="3" class="py-5 px-4 font-black text-right uppercase">Tổng Doanh Thu:</td><td class="py-5 px-4 text-right font-black text-2xl">${superTotal.toLocaleString()}đ</td></tr>`;
         }
 
-        // 5. CÁC HÀM XỬ LÝ BẢNG ĐƠN HÀNG (GIỮ NGUYÊN LOGIC CŨ)
         function formatDateTime(dateString) { const d = new Date(dateString); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; }
-
         function calculateRentalData(startStr, endStr) {
             const start = new Date(startStr); const end = new Date(endStr); let totalDays = 0;
-            let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-            let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()); let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
             while (currentDay <= endDay) {
                 let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
                 let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
                 if (start < b1End && end > b1Start) totalDays += 0.5;
-                if (start < b2End && end > b2Start) {
-                    let ignore = false; if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime() && start.getHours() >= 21) ignore = true;
-                    if (!ignore) totalDays += 0.5;
-                }
-                if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) {
-                    if (end.getHours() >= 0 && end.getHours() < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) totalDays += 0.5;
-                }
+                if (start < b2End && end > b2Start) { let ignore = false; if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime() && start.getHours() >= 21) ignore = true; if (!ignore) totalDays += 0.5; }
+                if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) { if (end.getHours() >= 0 && end.getHours() < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) totalDays += 0.5; }
                 currentDay.setDate(currentDay.getDate() + 1);
             }
             if (totalDays === 0 && end > start && start.getHours() < 21) totalDays = 0.5; return { days: totalDays };
@@ -301,68 +168,33 @@
 
         window.renderManagerTable = function() {
             const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
-            
             globalBookings.forEach(b => {
                 const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
                 const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
                 const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-1">🚗 ${b.route}</span>` : '';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
 
-                // BỔ SUNG DỮ LIỆU THẾ CHÂN
-                const depositAmount = b.bookingDeposit || 200000;
-                const secDepAmount = b.securityDepositAmount || 0;
+                const depositAmount = b.bookingDeposit || 200000; const secDepAmount = b.securityDepositAmount || 0;
                 let secText = b.securityMethod === 'money' ? `Tiền mặt (${secDepAmount.toLocaleString()}đ)` : `Xe máy (kèm cavet)`;
-
                 let financeHTML = `<span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span>`;
                 
                 if (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc') {
                     financeHTML += `<br><span class="text-xs text-blue-600 font-bold">Mức cọc: ${depositAmount.toLocaleString()}đ</span>`;
-                    if (b.status === 'Đã xác nhận') {
-                        let remaining = b.totalCost - depositAmount;
-                        financeHTML += `<br><span class="text-xs text-red-600 font-bold">Tiền thuê còn lại: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`;
-                    }
+                    if (b.status === 'Đã xác nhận') { let remaining = b.totalCost - depositAmount; financeHTML += `<br><span class="text-xs text-red-600 font-bold">Tiền thuê còn lại: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`; }
                 }
-                
-                // HIỂN THỊ YÊU CẦU THẾ CHÂN VÀO CỘT TÀI CHÍNH
-                if (b.status !== 'Đã khóa lịch') {
-                    financeHTML += `<br><span class="text-xs text-yellow-600 font-bold bg-yellow-50 px-1 rounded mt-1 inline-block">Thế chân: ${secText}</span>`;
-                }
+                if (b.status !== 'Đã khóa lịch') financeHTML += `<br><span class="text-xs text-yellow-600 font-bold bg-yellow-50 px-1 rounded mt-1 inline-block">Thế chân: ${secText}</span>`;
 
                 let btn = '';
                 if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe duyệt...</span>';
-                else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-2 rounded w-full text-sm font-bold hover:bg-green-600 shadow transition transform hover:scale-105">Xác nhận thu cọc<br>(${depositAmount.toLocaleString()}đ)</button>`;
-                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full text-sm font-semibold shadow hover:bg-yellow-600 transition">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-700 text-white px-2 py-1 rounded w-full text-sm font-semibold shadow hover:bg-gray-800 transition">Chốt đơn / Thu hồi</button>`;
+                else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-2 rounded w-full text-sm font-bold shadow hover:scale-105 transition">Xác nhận thu cọc<br>(${depositAmount.toLocaleString()}đ)</button>`;
+                else if (b.status === 'Đã xác nhận') btn = '<span class="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1 rounded border border-blue-200 block text-center">Chờ chủ xe thu hồi</span>';
                 else btn = '<span class="text-gray-400 text-sm font-semibold">Đã kết thúc</span>';
 
-                const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50' : 'hover:bg-red-50 transition duration-150';
-
-                tbody.innerHTML += `
-                    <tr class="${rowClass}">
-                        <td class="py-3 px-4"><span class="font-black text-blue-900">${b.carName}</span><br><span class="text-green-700 font-bold">${b.customerName}</span><br><span class="text-gray-600 font-medium">${b.phone}</span></td>
-                        <td class="py-3 px-4"><span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br><span class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2 py-1 rounded">Số ngày: ${rentalDays}</span>${addressDisplay}</td>
-                        <td class="py-3 px-4">${financeHTML}</td>
-                        <td class="py-3 px-4"><span class="bg-gray-200 border border-gray-300 px-3 py-1 text-xs font-bold rounded-full text-gray-700">${b.status}</span></td>
-                        <td class="py-3 px-4 text-center">${btn}</td>
-                    </tr>`;
+                const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50' : 'hover:bg-red-50 transition';
+                tbody.innerHTML += `<tr class="${rowClass}"><td class="py-3 px-4"><span class="font-black text-blue-900">${b.carName}</span><br><span class="text-green-700 font-bold">${b.customerName}</span><br><span class="text-gray-600 font-medium">${b.phone}</span></td><td class="py-3 px-4"><span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br><span class="text-indigo-600 font-bold text-xs bg-indigo-50 px-2 py-1 rounded">Số ngày: ${rentalDays}</span>${addressDisplay}</td><td class="py-3 px-4">${financeHTML}</td><td class="py-3 px-4"><span class="bg-gray-200 border px-3 py-1 text-xs font-bold rounded-full">${b.status}</span></td><td class="py-3 px-4 text-center">${btn}</td></tr>`;
             });
         }
-
-        window.confirmDeposit = async function(firebaseId) { if(confirm("Xác nhận đã nhận đủ tiền cọc giữ chỗ từ khách hàng?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã xác nhận' }); } }
-        window.finishBooking = async function(firebaseId) { if(confirm("Xe đã được trả về bãi an toàn và kết thúc hợp đồng?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); } }
-        window.updateEndTime = function(firebaseId) { currentEditingId = firebaseId; document.getElementById('modal-update-time').classList.remove('hidden'); }
-        window.closeUpdateModal = function() { document.getElementById('modal-update-time').classList.add('hidden'); currentEditingId = null; }
-
-        document.getElementById('btn-save-time').addEventListener('click', async () => {
-            const newTime = document.getElementById('newEndTime').value;
-            if(!newTime) { alert("Chọn giờ trả xe!"); return; }
-            const b = globalBookings.find(doc => doc.firebaseId === currentEditingId);
-            let isFar = false; if (b.route && b.route.includes("Đi xa")) isFar = true;
-            const carPrice = globalCars.find(c => c.id === b.carId).price;
-            const rentalDays = calculateRentalData(b.startTime, newTime).days;
-            let newTotalCost = rentalDays * carPrice;
-            if(isFar) newTotalCost += (rentalDays * 200000);
-            try { await updateDoc(doc(db, "bookings", currentEditingId), { endTime: newTime, totalCost: newTotalCost }); alert("Đã cập nhật lại giờ trả xe và tính lại tiền!"); window.closeUpdateModal(); } catch(e) { console.error(e); }
-        });
+        window.confirmDeposit = async function(firebaseId) { if(confirm("Xác nhận đã nhận đủ tiền cọc?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã xác nhận' }); } }
     </script>
 </body>
 </html>

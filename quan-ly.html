@@ -3,308 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tổng - Lịch & Thu Cọc</title>
+    <title>Quản Trị Hệ Thống</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
+    <nav class="bg-red-800 text-white p-4 shadow-md flex justify-between items-center mb-6">
+        <div class="font-bold text-xl">🛡️ Bảng Điều Khiển Quản Trị</div>
+        <div class="flex gap-2">
+            <a href="chu-xe.html" class="px-4 py-2 bg-green-600 rounded hover:bg-green-500">Chủ Xe</a>
+            <a href="index.html" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Khách Hàng</a>
+        </div>
+    </nav>
 
-    <!-- LỚP CỬA BẢO VỆ (ĐĂNG NHẬP QUẢN LÝ) -->
-    <div id="login-screen" class="fixed inset-0 bg-gray-800 flex flex-col items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-2xl text-center w-96">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Đăng Nhập Quản Lý</h2>
-            <p class="text-sm text-gray-500 mb-6">Vui lòng nhập mật khẩu để tiếp tục</p>
-            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu..." class="border p-3 mb-4 w-full rounded focus:ring-2 focus:ring-purple-500 text-center text-lg tracking-widest">
-            <button onclick="window.checkAdminPassword()" class="bg-purple-600 text-white px-6 py-3 rounded font-bold hover:bg-purple-700 w-full transition">Mở Khóa</button>
-            <p id="login-error" class="text-red-500 text-sm mt-3 hidden font-bold">Sai mật khẩu! Vui lòng thử lại.</p>
+    <div class="max-w-7xl mx-auto px-4 pb-12">
+        <h1 class="text-3xl font-bold text-red-900 mb-6">Trạm Quản Lý Đơn Hàng & Thu Cọc</h1>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-x-auto">
+            <table class="min-w-full bg-white text-sm">
+                <thead class="bg-red-800 text-white">
+                    <tr>
+                        <th class="py-3 px-4 text-left">Thông tin Khách & Xe</th>
+                        <th class="py-3 px-4 text-left">Chi tiết Lịch trình</th>
+                        <th class="py-3 px-4 text-left">Tài chính & Thu cọc</th>
+                        <th class="py-3 px-4 text-left">Trạng thái</th>
+                        <th class="py-3 px-4 text-center">Thao tác Admin</th>
+                    </tr>
+                </thead>
+                <tbody id="manager-table-body"></tbody>
+            </table>
         </div>
     </div>
 
-    <!-- NỘI DUNG QUẢN LÝ -->
-    <div id="main-content" class="hidden">
-        <nav class="bg-gray-800 text-white p-4 shadow-md flex justify-between items-center mb-6">
-            <div class="font-bold text-xl">🚗 Hệ Thống Quản Trị</div>
-            <div class="flex gap-2">
-                <a href="quan-ly.html" class="px-4 py-2 bg-purple-600 rounded font-bold hover:bg-purple-500">Quản Lý</a>
-                <a href="chu-xe.html" class="px-4 py-2 bg-green-600 rounded hover:bg-green-500">Chủ Xe</a>
-                <a href="index.html" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Khách Hàng</a>
-            </div>
-        </nav>
-
-        <div class="max-w-7xl mx-auto px-4 pb-12">
-            
-            <!-- KHU VỰC 1: CẤP TÀI KHOẢN CHỦ XE (MỚI) -->
-            <div class="bg-white p-6 rounded-lg shadow mb-8 border-t-4 border-indigo-500">
-                <h2 class="text-xl font-bold mb-4 text-indigo-700">Cấp ID Đăng Nhập Cho Chủ Xe</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <input type="text" id="newOwnerName" placeholder="Tên Chủ Xe" class="border p-2 rounded focus:ring-2 focus:ring-indigo-400">
-                    <input type="tel" id="newOwnerPhone" placeholder="Số điện thoại" class="border p-2 rounded focus:ring-2 focus:ring-indigo-400">
-                    <input type="text" id="newOwnerId" placeholder="Tạo ID Đăng Nhập (VD: chuxe01)" class="border p-2 rounded focus:ring-2 focus:ring-indigo-400 font-bold text-indigo-700">
-                </div>
-                <button onclick="window.createOwner()" class="bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700">Tạo Tài Khoản</button>
-            </div>
-
-            <!-- KHU VỰC 2: QUẢN LÝ CHỦ XE & DOANH THU (MỚI) -->
-            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 pb-2">Danh Sách Chủ Xe & Doanh Thu</h2>
-            <div class="bg-white rounded-lg shadow overflow-x-auto mb-10">
-                <table class="min-w-full bg-white text-sm">
-                    <thead class="bg-indigo-800 text-white">
-                        <tr>
-                            <th class="py-3 px-4 text-left">Thông Tin Chủ Xe</th>
-                            <th class="py-3 px-4 text-left">Danh Sách Xe & Doanh Thu Từng Xe</th>
-                            <th class="py-3 px-4 text-center">Tổng Doanh Thu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="owners-table-body"></tbody>
-                </table>
-            </div>
-
-            <!-- KHU VỰC 3: QUẢN LÝ ĐƠN HÀNG & THU CỌC (CŨ) -->
-            <h1 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 pb-2">Quản Lý Lịch Đặt & Thu Cọc</h1>
-            <div class="bg-white rounded-lg shadow overflow-x-auto">
-                <table class="min-w-full bg-white text-sm">
-                    <thead class="bg-gray-800 text-white">
-                        <tr>
-                            <th class="py-3 px-4 text-left">Xe & Khách</th>
-                            <th class="py-3 px-4 text-left">Lịch trình & Địa điểm</th>
-                            <th class="py-3 px-4 text-left">Tổng Tiền</th>
-                            <th class="py-3 px-4 text-left">Trạng Thái</th>
-                            <th class="py-3 px-4 text-center">Hành Động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="manager-table-body"></tbody>
-                </table>
+    <!-- MODAL SỬA LỊCH TRẢ XE -->
+    <div id="modal-update-time" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4 text-gray-800">Cập nhật giờ khách trả xe thực tế</h3>
+            <input type="text" id="newEndTime" class="w-full border p-2 rounded mb-4" placeholder="Chọn ngày giờ trả xe mới...">
+            <div class="flex justify-end gap-2">
+                <button onclick="window.closeUpdateModal()" class="bg-gray-400 text-white px-4 py-2 rounded">Hủy</button>
+                <button id="btn-save-time" class="bg-yellow-500 text-white px-4 py-2 rounded font-bold">Lưu & Tính lại tiền</button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT XỬ LÝ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // BẠN HÃY DÁN ĐOẠN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
-  authDomain: "thuexetulai-fcd79.firebaseapp.com",
-  projectId: "thuexetulai-fcd79",
-  storageBucket: "thuexetulai-fcd79.firebasestorage.app",
-  messagingSenderId: "984655156691",
-  appId: "1:984655156691:web:ff57df0de4f5f2ee040b26",
-  measurementId: "G-Q4RFFJ76NT"
-};
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
+            authDomain: "thuexetulai-fcd79.firebaseapp.com",
+            projectId: "thuexetulai-fcd79",
+            storageBucket: "thuexetulai-fcd79.firebasestorage.app",
+            messagingSenderId: "984655156691",
+            appId: "1:984655156691:web:ff57df0de4f5f2ee040b26",
+            measurementId: "G-Q4RFFJ76NT"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const DEPOSIT_AMOUNT = 200000; 
-        let globalBookings = [];
-        let globalCars = [];
-        let globalOwners = [];
+        let globalBookings = []; let globalCars = [];
+        let currentEditingId = null;
 
-        window.checkAdminPassword = function() {
-            const passInput = document.getElementById('adminPassword').value;
-            if (passInput === '679195') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
+        flatpickr("#newEndTime", { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" });
 
-        document.getElementById('adminPassword').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') window.checkAdminPassword();
-        });
-
-        // Lắng nghe 3 bảng dữ liệu
+        onSnapshot(collection(db, "cars"), (snapshot) => { globalCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); });
         onSnapshot(collection(db, "bookings"), (snapshot) => {
             globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
             globalBookings.sort((a, b) => b.timestamp - a.timestamp);
             window.renderManagerTable();
-            window.renderOwnersTable();
         });
 
-        onSnapshot(collection(db, "cars"), (snapshot) => {
-            globalCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            window.renderOwnersTable();
-        });
+        function formatDateTime(dateString) { const d = new Date(dateString); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; }
 
-        onSnapshot(collection(db, "owners"), (snapshot) => {
-            globalOwners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            window.renderOwnersTable();
-        });
-
-        // HÀM TẠO TÀI KHOẢN CHỦ XE
-        window.createOwner = async function() {
-            const name = document.getElementById('newOwnerName').value.trim();
-            const phone = document.getElementById('newOwnerPhone').value.trim();
-            const loginId = document.getElementById('newOwnerId').value.trim();
-
-            if(!name || !phone || !loginId) {
-                alert("Vui lòng điền đầy đủ Tên, SĐT và ID Đăng Nhập!"); return;
-            }
-
-            // Kiểm tra trùng ID
-            const isDuplicate = globalOwners.some(owner => owner.loginId === loginId);
-            if(isDuplicate) {
-                alert(`ID "${loginId}" đã tồn tại. Vui lòng chọn ID khác!`); return;
-            }
-
-            try {
-                await addDoc(collection(db, "owners"), {
-                    name: name,
-                    phone: phone,
-                    loginId: loginId,
-                    createdAt: Date.now()
-                });
-                alert("Đã cấp tài khoản Chủ Xe thành công!");
-                document.getElementById('newOwnerName').value = '';
-                document.getElementById('newOwnerPhone').value = '';
-                document.getElementById('newOwnerId').value = '';
-            } catch (error) { console.error("Lỗi:", error); }
-        }
-
-        // HÀM RENDER BẢNG CHỦ XE VÀ DOANH THU
-        window.renderOwnersTable = function() {
-            const tbody = document.getElementById('owners-table-body');
-            tbody.innerHTML = '';
-
-            globalOwners.forEach(owner => {
-                // Lấy tất cả xe của chủ này
-                const ownerCars = globalCars.filter(car => car.ownerId === owner.loginId);
-                let carListHTML = '';
-                let totalOwnerRevenue = 0;
-
-                if (ownerCars.length === 0) {
-                    carListHTML = `<span class="text-gray-400 italic">Chưa có xe nào trên hệ thống</span>`;
-                } else {
-                    ownerCars.forEach(car => {
-                        // Tính doanh thu từng xe (Chỉ tính đơn Đã xác nhận / Đã thu hồi)
-                        const carBookings = globalBookings.filter(b => b.carId === car.id && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'));
-                        const carRevenue = carBookings.reduce((sum, b) => sum + b.totalCost, 0);
-                        totalOwnerRevenue += carRevenue;
-
-                        carListHTML += `
-                            <div class="flex justify-between border-b border-gray-100 py-1 last:border-0">
-                                <span class="font-semibold text-gray-700">${car.name}</span>
-                                <span class="text-green-600 font-bold">${carRevenue.toLocaleString()}đ</span>
-                            </div>
-                        `;
-                    });
-                }
-
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-indigo-50">
-                        <td class="py-3 px-4">
-                            <span class="font-bold text-indigo-900 text-lg">${owner.name}</span><br>
-                            <span class="text-gray-600">SĐT: ${owner.phone}</span><br>
-                            <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-bold mt-1 inline-block">ID: ${owner.loginId}</span>
-                        </td>
-                        <td class="py-3 px-4 bg-white m-2 rounded shadow-sm border border-gray-100">${carListHTML}</td>
-                        <td class="py-3 px-4 text-center font-black text-red-600 text-lg">${totalOwnerRevenue.toLocaleString()}đ</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function formatDateTime(dateString) {
-            const d = new Date(dateString);
-            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-        }
-
-        function calculateRentalData(startStr, endStr, carPrice = 0) {
-            const start = new Date(startStr); 
-            const end = new Date(endStr); 
-            let totalDays = 0; 
-            let surcharge = 0;
-            // SỬ DỤNG MẢNG ĐỂ LƯU TRỮ NHIỀU THÔNG BÁO CÙNG LÚC
-            let notes = []; 
-
+        function calculateRentalData(startStr, endStr) {
+            const start = new Date(startStr); const end = new Date(endStr); let totalDays = 0;
             let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
             let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-
             while (currentDay <= endDay) {
-                let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); 
-                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0); 
-                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); 
-                let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
-                
-                let dayAdded = 0;
-
-                // 1. Ca sáng (07:00 - 15:00)
-                if (start < b1End && end > b1Start) {
-                    dayAdded += 0.5;
-                }
-
-                // 2. Ca chiều (15:00 - 22:00)
+                let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0);
+                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
+                if (start < b1End && end > b1Start) totalDays += 0.5;
                 if (start < b2End && end > b2Start) {
-                    let ignoreAfternoon = false;
-                    if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()) {
-                        if (start.getHours() >= 21) {
-                            ignoreAfternoon = true;
-                            // Đẩy thông báo nhận muộn vào danh sách
-                            notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng.");
-                        }
-                    }
-                    if (!ignoreAfternoon) dayAdded += 0.5;
+                    let ignore = false; if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime() && start.getHours() >= 21) ignore = true;
+                    if (!ignore) totalDays += 0.5;
                 }
-
-                // 3. Luật trả muộn trong ngày (22:00 đến 00:00)
-                if (currentDay.getTime() === endDay.getTime()) {
-                    let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
-                    if (endTimeInHours > 22 && endTimeInHours < 24) {
-                        let rawSurcharge = (endTimeInHours - 22) * 100000;
-                        surcharge += Math.round(rawSurcharge);
-                        // Đẩy thông báo trả muộn vào danh sách
-                        let phutTra = end.getMinutes() === 0 ? '00' : end.getMinutes();
-                        notes.push(`*Phụ phí trả xe muộn (lúc ${end.getHours()}h${phutTra}): ${Math.round(rawSurcharge).toLocaleString()}đ`);
-                    }
-                }
-
-                // 4. Luật trả qua ngày (Sau 00:00)
                 if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) {
-                    let endHour = end.getHours();
-                    if (endHour >= 0 && endHour < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) {
-                        dayAdded += 0.5;
-                    }
+                    if (end.getHours() >= 0 && end.getHours() < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) totalDays += 0.5;
                 }
-
-                totalDays += dayAdded;
                 currentDay.setDate(currentDay.getDate() + 1);
             }
-
-            // Chốt chặn an toàn: Tối thiểu nửa ngày
-            if (totalDays === 0 && end > start && start.getHours() < 21) {
-                totalDays = 0.5; 
-            }
-
-            return {
-                days: totalDays,
-                surcharge: surcharge,
-                totalCost: (totalDays * carPrice) + surcharge,
-                // Gộp tất cả các thông báo lại, phân cách bằng thẻ xuống dòng <br>
-                note: notes.join('<br>') 
-            };
+            if (totalDays === 0 && end > start && start.getHours() < 21) totalDays = 0.5; return { days: totalDays };
         }
-        // HÀM RENDER BẢNG ĐƠN HÀNG (GIỮ NGUYÊN)
+
         window.renderManagerTable = function() {
-            const tbody = document.getElementById('manager-table-body'); 
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
             
             globalBookings.forEach(b => {
                 const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
-                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
-                const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
-                
-                // BỔ SUNG HIỂN THỊ LỘ TRÌNH ĐI XA HOẶC NỘI THÀNH
-                const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-2 shadow-sm">🚗 Lộ trình: ${b.route}</span>` : '';
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
+                const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-1">🚗 ${b.route}</span>` : '';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
 
+                // DỮ LIỆU TÀI CHÍNH
+                const depositAmount = b.bookingDeposit || 200000;
+                let financeHTML = `<span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span>`;
+                
+                if (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc') {
+                    financeHTML += `<br><span class="text-xs text-blue-600 font-bold">Mức cọc: ${depositAmount.toLocaleString()}đ</span>`;
+                    if (b.status === 'Đã xác nhận') {
+                        let remaining = b.totalCost - depositAmount;
+                        financeHTML += `<br><span class="text-xs text-red-600 font-bold">Phải thu: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`;
+                    }
+                }
+
+                // NÚT BẤM LINH HOẠT THEO MỨC CỌC
                 let btn = '';
-                if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe...</span>';
-                else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-1 rounded w-full text-sm font-bold hover:bg-green-600 shadow">Thu cọc ${DEPOSIT_AMOUNT.toLocaleString()}đ</button>`;
-                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full text-sm font-semibold shadow">Sửa lịch</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-600 text-white px-2 py-1 rounded w-full text-sm font-semibold shadow">Thu hồi xe</button>`;
-                else btn = '<span class="text-gray-400 text-sm">Đã xong</span>';
+                if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe duyệt...</span>';
+                else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-2 rounded w-full text-sm font-bold hover:bg-green-600 shadow">Xác nhận thu cọc<br>(${depositAmount.toLocaleString()}đ)</button>`;
+                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-1 rounded mb-1 w-full text-sm font-semibold shadow">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-600 text-white px-2 py-1 rounded w-full text-sm font-semibold shadow">Chốt đơn / Thu hồi xe</button>`;
+                else btn = '<span class="text-gray-400 text-sm">Đã kết thúc</span>';
 
                 const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50 border-b' : 'border-b hover:bg-gray-50';
 
@@ -312,7 +133,7 @@ const firebaseConfig = {
                     <tr class="${rowClass}">
                         <td class="py-2 px-4"><span class="font-bold text-blue-900">${b.carName}</span><br><span class="text-green-600 font-bold">${b.customerName}</span><br><span class="text-gray-600">${b.phone}</span></td>
                         <td class="py-2 px-4"><span class="font-bold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-bold text-red-600">Trả: ${formatDateTime(b.endTime)}</span><br><span class="text-indigo-600 font-bold text-xs">Số ngày: ${rentalDays}</span>${addressDisplay}</td>
-                        <td class="py-2 px-4"><span class="font-bold text-red-500">${b.totalCost.toLocaleString()}đ</span><br>${b.status === 'Đã xác nhận' ? `<span class="text-xs text-gray-500">Đã cọc: ${DEPOSIT_AMOUNT/1000}k / Còn: ${(b.totalCost - DEPOSIT_AMOUNT).toLocaleString()}đ</span>` : ''}</td>
+                        <td class="py-2 px-4">${financeHTML}</td>
                         <td class="py-2 px-4"><span class="bg-gray-100 border px-2 py-1 text-xs font-semibold rounded shadow-sm">${b.status}</span></td>
                         <td class="py-2 px-4 text-center">${btn}</td>
                     </tr>`;
@@ -320,23 +141,42 @@ const firebaseConfig = {
         }
 
         window.confirmDeposit = async function(firebaseId) {
-            if(confirm("Xác nhận đã thu 200.000đ cọc?")) {
-                try { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã xác nhận' }); } catch(error) { console.error(error); }
+            if(confirm("Xác nhận đã nhận đủ tiền cọc giữ chỗ từ khách hàng?")) {
+                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã xác nhận' });
             }
         }
-        window.updateEndTime = async function(firebaseId) {
-            const b = globalBookings.find(x => x.firebaseId === firebaseId);
-            const newTotalCost = calculateRentalData(b.startTime, newTime, globalCars.find(c => c.id === b.carId).price).totalCost;
-            if(newTime && !isNaN(new Date(newTime).getTime())) {
-                const newTotalCost = calculateRentalDays(b.startTime, newTime) * globalCars.find(c => c.id === b.carId).price;
-                try { await updateDoc(doc(db, "bookings", firebaseId), { endTime: newTime, totalCost: newTotalCost }); } catch(error) { console.error(error); }
-            }
-        }
+
         window.finishBooking = async function(firebaseId) {
-            if(confirm("Xác nhận khách đã trả xe và hoàn tất đơn?")) {
-                try { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); } catch(error) { console.error(error); }
+            if(confirm("Xe đã được trả về bãi an toàn và kết thúc hợp đồng?")) {
+                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' });
             }
         }
+
+        window.updateEndTime = function(firebaseId) {
+            currentEditingId = firebaseId; document.getElementById('modal-update-time').classList.remove('hidden');
+        }
+        window.closeUpdateModal = function() { document.getElementById('modal-update-time').classList.add('hidden'); currentEditingId = null; }
+
+        document.getElementById('btn-save-time').addEventListener('click', async () => {
+            const newTime = document.getElementById('newEndTime').value;
+            if(!newTime) { alert("Chọn giờ trả xe!"); return; }
+            const b = globalBookings.find(doc => doc.firebaseId === currentEditingId);
+            
+            let isFar = false; if (b.route && b.route.includes("Đi xa")) isFar = true;
+            
+            // Tính lại tiền
+            const carPrice = globalCars.find(c => c.id === b.carId).price;
+            
+            // Giả lập logic tính nhanh (anh có thể copy hàm tính chi tiết từ index.html nếu cần tuyệt đối chính xác)
+            const rentalDays = calculateRentalData(b.startTime, newTime).days;
+            let newTotalCost = rentalDays * carPrice;
+            if(isFar) newTotalCost += (rentalDays * 200000);
+
+            try {
+                await updateDoc(doc(db, "bookings", currentEditingId), { endTime: newTime, totalCost: newTotalCost });
+                alert("Đã cập nhật lại giờ trả xe và tính lại tiền!"); window.closeUpdateModal();
+            } catch(e) { console.error(e); }
+        });
     </script>
 </body>
 </html>

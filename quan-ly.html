@@ -308,15 +308,24 @@
                 const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-1">🚗 ${b.route}</span>` : '';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
 
+                // BỔ SUNG DỮ LIỆU THẾ CHÂN
                 const depositAmount = b.bookingDeposit || 200000;
+                const secDepAmount = b.securityDepositAmount || 0;
+                let secText = b.securityMethod === 'money' ? `Tiền mặt (${secDepAmount.toLocaleString()}đ)` : `Xe máy (kèm cavet)`;
+
                 let financeHTML = `<span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span>`;
                 
                 if (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc') {
                     financeHTML += `<br><span class="text-xs text-blue-600 font-bold">Mức cọc: ${depositAmount.toLocaleString()}đ</span>`;
                     if (b.status === 'Đã xác nhận') {
                         let remaining = b.totalCost - depositAmount;
-                        financeHTML += `<br><span class="text-xs text-red-600 font-bold">Phải thu: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`;
+                        financeHTML += `<br><span class="text-xs text-red-600 font-bold">Tiền thuê còn lại: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`;
                     }
+                }
+                
+                // HIỂN THỊ YÊU CẦU THẾ CHÂN VÀO CỘT TÀI CHÍNH
+                if (b.status !== 'Đã khóa lịch') {
+                    financeHTML += `<br><span class="text-xs text-yellow-600 font-bold bg-yellow-50 px-1 rounded mt-1 inline-block">Thế chân: ${secText}</span>`;
                 }
 
                 let btn = '';

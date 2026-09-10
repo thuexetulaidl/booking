@@ -216,6 +216,52 @@ const firebaseConfig = {
             ownerCars.forEach(car => { dropdown.innerHTML += `<option value="${car.id}">${car.name}</option>`; });
         }
 
+        // HÀM HỖ TRỢ NÉN ẢNH TỰ ĐỘNG TRÁNH VƯỢT QUÁ DUNG LƯỢNG
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Giới hạn kích thước tối đa cho phép để ảnh nhẹ mượt
+                        const MAX_WIDTH = 1280;
+                        const MAX_HEIGHT = 1280;
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Chuyển đổi về định dạng JPEG với chất lượng 80% (vừa nét, vừa nhẹ)
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            }));
+                        }, 'image/jpeg', 0.8);
+                    };
+                };
+            });
+        }
+
+        // HÀM ĐĂNG XE ĐÃ TÍCH HỢP TỰ ĐỘNG NÉN ẢNH
         window.addCar = async function() {
             const brand = document.getElementById('newCarBrand').value;
             const name = document.getElementById('newCarName').value.trim();
@@ -233,19 +279,11 @@ const firebaseConfig = {
                 alert("Vui lòng chọn từ 1 đến 5 bức ảnh!"); return;
             }
 
-            const MAX_FILE_SIZE = 32 * 1024 * 1024; 
-for (let i = 0; i < imageFiles.length; i++) {
-    if (imageFiles[i].size > MAX_FILE_SIZE) {
-        alert(`Lỗi: Ảnh thứ ${i + 1} vượt quá 32MB. Vui lòng chọn ảnh nhỏ hơn!`);
-        return; 
-    }
-}
-
             const isDuplicate = myCars.some(car => car.ownerId === currentOwnerId && car.name.toLowerCase() === name.toLowerCase());
             if (isDuplicate) { alert(`Lỗi: Tên xe "${name}" đã tồn tại.`); return; }
 
             const btn = document.getElementById('btn-add-car');
-            btn.innerText = "Đang kết nối kho ảnh... Vui lòng đợi!";
+            btn.innerText = "Đang tối ưu và tải ảnh lên... Vui lòng đợi!";
             btn.disabled = true;
 
             try {
@@ -253,16 +291,22 @@ for (let i = 0; i < imageFiles.length; i++) {
                 const IMGBB_API_KEY = "d9bfbfa59f386106cc48b03372be9eb1"; 
                 
                 for (let i = 0; i < imageFiles.length; i++) {
+                    // Tự động nén ảnh trước khi đẩy lên ImgBB
+                    const optimizedFile = await compressImage(imageFiles[i]);
+
                     const formData = new FormData();
-                    formData.append("image", imageFiles[i]);
+                    formData.append("image", optimizedFile);
                     
                     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                         method: 'POST', body: formData
                     });
                     
                     const result = await response.json();
-                    if(result.success) { uploadedImageUrls.push(result.data.url); } 
-                    else { throw new Error("Lỗi từ hệ thống ImgBB"); }
+                    if(result.success) { 
+                        uploadedImageUrls.push(result.data.url); 
+                    } else { 
+                        throw new Error("Lỗi từ hệ thống lưu trữ ảnh ImgBB"); 
+                    }
                 }
 
                 await addDoc(collection(db, "cars"), {
@@ -271,18 +315,19 @@ for (let i = 0; i < imageFiles.length; i++) {
                     price: price, images: uploadedImageUrls
                 });
                 
-                alert("Đăng xe thành công! Kho ảnh đã sẵn sàng.");
-                document.getElementById('newCarName').value = ''; document.getElementById('newCarPrice').value = ''; document.getElementById('newCarImages').value = '';
+                alert("Đăng xe thành công! Hình ảnh đã được tối ưu và lưu lại.");
+                document.getElementById('newCarName').value = ''; 
+                document.getElementById('newCarPrice').value = ''; 
+                document.getElementById('newCarImages').value = '';
                 
-                // Tự động đóng popup sau khi đăng xong
                 window.closeAddCarModal();
             } catch (error) { 
-                console.error(error); alert("Lỗi khi tải ảnh! Vui lòng kiểm tra lại kết nối mạng hoặc chọn ảnh khác."); 
+                console.error(error); alert("Lỗi khi tải ảnh! Vui lòng kiểm tra lại kết nối mạng."); 
             } finally {
-                btn.innerText = "Đăng Xe"; btn.disabled = false;
+                btn.innerText = "Đăng Xe"; 
+                btn.disabled = false;
             }
         }
-
         window.blockCarSchedule = async function() {
             const carId = document.getElementById('blockCarSelect').value; const startStr = document.getElementById('blockStartTime').value; const endStr = document.getElementById('blockEndTime').value;
             if(!carId || !startStr || !endStr) { alert("Vui lòng chọn xe và thời gian!"); return; }

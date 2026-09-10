@@ -16,9 +16,9 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- MODAL ĐẶT XE -->
+    <!-- MODAL ĐẶT XE (ĐÃ BỔ SUNG CỌC GIỮ CHỖ & THẾ CHÂN) -->
     <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
-        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl max-h-[95vh] overflow-y-auto">
             <h3 class="font-bold text-xl mb-4 text-blue-800">Thông tin đặt xe</h3>
             <p id="modal-car-name" class="text-gray-600 mb-4 font-semibold"></p>
             
@@ -27,6 +27,19 @@
             <input type="text" id="deliveryAddress" placeholder="Địa chỉ giao xe (Có thể báo sau)" class="w-full border p-3 mb-3 rounded focus:ring-2 focus:ring-blue-400">
             <input type="text" id="returnAddress" placeholder="Địa chỉ trả xe (Có thể báo sau)" class="w-full border p-3 mb-4 rounded focus:ring-2 focus:ring-blue-400">
             
+            <label class="block text-sm font-bold text-gray-700 mb-1">Mức cọc giữ chỗ (*)</label>
+            <select id="bookingDepositAmount" class="w-full border p-3 mb-4 rounded focus:ring-2 focus:ring-blue-400 bg-blue-50 font-semibold text-blue-800">
+                <option value="200000">200.000 đ</option>
+                <option value="300000">300.000 đ</option>
+                <option value="500000">500.000 đ</option>
+                <option value="1000000">1.000.000 đ</option>
+            </select>
+
+            <label class="block text-sm font-bold text-gray-700 mb-1">Phương thức cọc thế chân khi nhận xe (*)</label>
+            <select id="securityMethod" class="w-full border p-3 mb-6 rounded focus:ring-2 focus:ring-yellow-400 bg-yellow-50 font-semibold text-yellow-800">
+                <!-- Sẽ được tự động điền bằng JavaScript dựa trên xe -->
+            </select>
+
             <div class="flex justify-end gap-2">
                 <button onclick="window.closeModal()" class="bg-gray-400 text-white px-6 py-2 rounded font-bold hover:bg-gray-500">Hủy</button>
                 <button id="btn-submit" onclick="window.submitBooking()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 shadow">Xác nhận Đặt</button>
@@ -34,7 +47,7 @@
         </div>
     </div>
 
-    <!-- MODAL TRA CỨU ĐƠN HÀNG (TÍNH NĂNG MỚI) -->
+    <!-- MODAL TRA CỨU ĐƠN HÀNG (ĐÃ BỔ SUNG CHI TIẾT TÀI CHÍNH) -->
     <div id="tracking-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center z-50 p-4">
         <div class="bg-white p-6 rounded-lg w-full max-w-2xl shadow-2xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
@@ -46,15 +59,12 @@
                 <input type="tel" id="trackingPhone" placeholder="Nhập số điện thoại..." class="flex-grow border p-3 rounded focus:ring-2 focus:ring-blue-400 font-bold">
                 <button onclick="window.trackOrder()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 shadow">Tìm kiếm</button>
             </div>
-            <div class="overflow-y-auto flex-grow" id="tracking-results">
-                <!-- Kết quả tra cứu sẽ hiện ở đây -->
-            </div>
+            <div class="overflow-y-auto flex-grow" id="tracking-results"></div>
         </div>
     </div>
 
-    <!-- TIÊU ĐỀ HÌNH ẢNH ĐÀ LẠT ĐẸP MẮT (MỚI) -->
+    <!-- TIÊU ĐỀ & BỘ LỌC (GIỮ NGUYÊN) -->
     <header class="relative bg-blue-600 text-white text-center p-16 shadow-lg bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
-        <!-- Lớp phủ mờ để làm nổi bật chữ -->
         <div class="absolute inset-0 bg-black bg-opacity-50"></div> 
         <div class="relative z-10">
             <h1 class="text-4xl md:text-5xl font-black mb-3 tracking-wide">Thuê Xe Tự Lái Đà Lạt</h1>
@@ -65,7 +75,6 @@
         </div>
     </header>
 
-    <!-- BỘ LỌC TÌM KIẾM CẢI TIẾN -->
     <div class="max-w-5xl mx-auto mt-[-30px] relative z-20 bg-white p-6 md:p-8 rounded-xl shadow-xl border-t-4 border-blue-500">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -76,7 +85,6 @@
                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase">Thời gian trả xe</label>
                 <input type="text" id="endTime" class="w-full border-2 border-gray-200 rounded p-3 bg-white focus:border-blue-500 focus:outline-none" placeholder="Chọn ngày giờ...">
             </div>
-            <!-- CHỌN KHU VỰC ĐI XA (MỚI) -->
             <div>
                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase">Lộ trình di chuyển</label>
                 <select id="travelArea" onchange="window.toggleDestinationInput()" class="w-full border-2 border-gray-200 rounded p-3 bg-white focus:border-blue-500 focus:outline-none font-semibold text-gray-700">
@@ -86,9 +94,7 @@
                 <input type="text" id="travelDestination" placeholder="Nhập tỉnh/thành phố bạn đến..." class="w-full border-2 border-yellow-400 rounded p-3 mt-3 bg-yellow-50 focus:outline-none hidden transition">
             </div>
         </div>
-        <button onclick="window.searchAvailableCars()" class="mt-6 w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-lg hover:bg-blue-700 transition shadow-md uppercase tracking-wider">
-            Tìm Kiếm Xe Trống
-        </button>
+        <button onclick="window.searchAvailableCars()" class="mt-6 w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-lg hover:bg-blue-700 transition shadow-md uppercase tracking-wider">Tìm Kiếm Xe Trống</button>
         <p id="search-msg" class="text-red-500 mt-3 hidden text-center font-bold bg-red-50 p-2 rounded"></p>
     </div>
 
@@ -98,29 +104,17 @@
         <div id="car-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </div>
 
-    <!-- NÚT LIÊN HỆ ĐÃ ĐƯỢC VẼ BẰNG MÃ SVG CHỐNG LỖI -->
+    <!-- NÚT LIÊN HỆ -->
     <div class="fab-container">
-        <!-- Zalo Icon -->
-        <a href="https://zalo.me/0877798798" target="_blank" class="fab-icon bg-blue-500 flex justify-center items-center" title="Chat Zalo">
-            <svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <text x="50" y="60" font-family="Arial" font-size="32" font-weight="bold" fill="white" text-anchor="middle">Zalo</text>
-            </svg>
-        </a>
-        <!-- Messenger Icon -->
-        <a href="https://m.me/29024354103822524" target="_blank" class="fab-icon bg-blue-600 flex justify-center items-center" title="Chat Messenger">
-            <svg width="34" height="34" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M50 15 C28 15 10 31 10 50.5 C10 61.5 15.5 71.5 24.5 77.5 C25.5 78.5 26 79.5 26 81 V90.5 C26 92.5 28 93.5 29.5 92.5 L39 87 C39.5 86.5 40.5 86.5 41.5 86.5 C44 87 47 87.5 50 87.5 C72 87.5 90 71.5 90 50.5 C90 31 72 15 50 15 Z" fill="white"/>
-                <path d="M28 57 L38 41 L49 48 L61 34 L51 51 L40 43 Z" fill="#2563EB"/>
-            </svg>
-        </a>
+        <a href="https://zalo.me/0877798798" target="_blank" class="fab-icon bg-blue-500 flex justify-center items-center" title="Chat Zalo"><svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><text x="50" y="60" font-family="Arial" font-size="32" font-weight="bold" fill="white" text-anchor="middle">Zalo</text></svg></a>
+        <a href="https://m.me/29024354103822524" target="_blank" class="fab-icon bg-blue-600 flex justify-center items-center" title="Chat Messenger"><svg width="34" height="34" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 15 C28 15 10 31 10 50.5 C10 61.5 15.5 71.5 24.5 77.5 C25.5 78.5 26 79.5 26 81 V90.5 C26 92.5 28 93.5 29.5 92.5 L39 87 C39.5 86.5 40.5 86.5 41.5 86.5 C44 87 47 87.5 50 87.5 C72 87.5 90 71.5 90 50.5 C90 31 72 15 50 15 Z" fill="white"/><path d="M28 57 L38 41 L49 48 L61 34 L51 51 L40 43 Z" fill="#2563EB"/></svg></a>
     </div>
 
-    <!-- MÃ LOGIC & KẾT NỐI FIREBASE -->
+    <!-- JAVASCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // CẤU HÌNH FIREBASE CỦA ANH
         const firebaseConfig = {
             apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
             authDomain: "thuexetulai-fcd79.firebaseapp.com",
@@ -130,14 +124,10 @@
             appId: "1:984655156691:web:ff57df0de4f5f2ee040b26",
             measurementId: "G-Q4RFFJ76NT"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let globalBookings = [];
-        let dynamicCars = [];
-        let isTimeSelected = false;
-        let pendingCarSelection = null;
+        let globalBookings = []; let dynamicCars = []; let isTimeSelected = false; let pendingCarSelection = null;
 
         const flatpickrConfig = { 
             enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, 
@@ -153,13 +143,11 @@
                 }
             }
         };
-        flatpickr("#startTime", flatpickrConfig);
-        flatpickr("#endTime", flatpickrConfig);
+        flatpickr("#startTime", flatpickrConfig); flatpickr("#endTime", flatpickrConfig);
 
         onSnapshot(collection(db, "cars"), (snapshot) => {
             dynamicCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if(!isTimeSelected) window.renderCars(dynamicCars, false);
-            else window.renderCars(dynamicCars, true);
+            if(!isTimeSelected) window.renderCars(dynamicCars, false); else window.renderCars(dynamicCars, true);
         });
 
         onSnapshot(collection(db, "bookings"), (snapshot) => {
@@ -167,25 +155,17 @@
             if (isTimeSelected) window.searchAvailableCars();
         });
 
-        // HÀM ẨN/HIỆN Ô NHẬP ĐIỂM ĐẾN
         window.toggleDestinationInput = function() {
             const area = document.getElementById('travelArea').value;
             const destInput = document.getElementById('travelDestination');
-            if (area === 'far') {
-                destInput.classList.remove('hidden');
-            } else {
-                destInput.classList.add('hidden');
-                destInput.value = '';
-            }
+            if (area === 'far') destInput.classList.remove('hidden'); else { destInput.classList.add('hidden'); destInput.value = ''; }
         }
 
-        // HÀM ĐỊNH DẠNG NGÀY GIỜ CHO TRA CỨU
         function formatDateTime(dateString) {
             const d = new Date(dateString); 
             return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        // HÀM TRA CỨU ĐƠN HÀNG (MỚI)
         window.openTrackingModal = function() { document.getElementById('tracking-modal').classList.remove('hidden'); }
         window.closeTrackingModal = function() { document.getElementById('tracking-modal').classList.add('hidden'); document.getElementById('tracking-results').innerHTML = ''; }
         
@@ -195,13 +175,9 @@
             
             const myBookings = globalBookings.filter(b => b.phone === phone);
             const resultsContainer = document.getElementById('tracking-results');
+            if (myBookings.length === 0) { resultsContainer.innerHTML = `<div class="bg-red-50 p-4 rounded text-red-600 font-bold text-center">Không tìm thấy đơn đặt xe nào với số điện thoại ${phone}.</div>`; return; }
             
-            if (myBookings.length === 0) {
-                resultsContainer.innerHTML = `<div class="bg-red-50 p-4 rounded text-red-600 font-bold text-center">Không tìm thấy đơn đặt xe nào với số điện thoại ${phone}.</div>`;
-                return;
-            }
-            
-            myBookings.sort((a, b) => b.timestamp - a.timestamp); // Xếp đơn mới lên đầu
+            myBookings.sort((a, b) => b.timestamp - a.timestamp); 
             
             let html = '<div class="space-y-4">';
             myBookings.forEach(b => {
@@ -212,6 +188,16 @@
                 if (b.status === 'Đã thu hồi') statusColor = 'bg-gray-200 text-gray-600 border-gray-300';
                 
                 const routeInfo = b.route ? `<p class="text-sm text-gray-600 mt-1">Lộ trình: <span class="font-semibold">${b.route}</span></p>` : '';
+                
+                // TÍNH TOÁN HIỂN THỊ CHI TIẾT TÀI CHÍNH
+                const depositPaid = b.bookingDeposit || 200000;
+                let remainingRental = b.totalCost - depositPaid;
+                if (remainingRental < 0) remainingRental = 0; // Tránh số âm nếu cọc lớn hơn tiền thuê
+                
+                const secDepAmount = b.securityDepositAmount || 0;
+                let secMethodText = "Chưa rõ";
+                if (b.securityMethod === 'money') secMethodText = `Tiền mặt (${secDepAmount.toLocaleString()}đ)`;
+                if (b.securityMethod === 'bike') secMethodText = `Xe máy kèm cavet`;
 
                 html += `
                     <div class="border-2 p-4 rounded-lg shadow-sm ${statusColor}">
@@ -222,73 +208,46 @@
                         <p class="text-sm text-gray-800">Lấy xe: <span class="font-bold">${formatDateTime(b.startTime)}</span></p>
                         <p class="text-sm text-gray-800">Trả xe: <span class="font-bold">${formatDateTime(b.endTime)}</span></p>
                         ${routeInfo}
-                        <div class="mt-3 pt-3 border-t border-gray-300 border-opacity-50 flex justify-between items-center">
-                            <span class="text-sm font-bold text-gray-700">Tổng chi phí:</span>
-                            <span class="font-black text-red-600 text-lg">${b.totalCost.toLocaleString()}đ</span>
+                        
+                        <div class="mt-4 pt-3 border-t border-gray-300 border-opacity-50 text-sm">
+                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tổng tiền thuê xe:</span><span class="font-bold text-gray-800">${b.totalCost.toLocaleString()}đ</span></div>
+                            <div class="flex justify-between mb-1"><span class="text-gray-600">Đã cọc giữ chỗ:</span><span class="font-bold text-blue-600">- ${depositPaid.toLocaleString()}đ</span></div>
+                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tiền thuê còn lại:</span><span class="font-bold text-red-600">${remainingRental.toLocaleString()}đ</span></div>
+                            <div class="flex justify-between mb-1 mt-2 pt-2 border-t border-dashed border-gray-300"><span class="font-bold text-gray-700">Yêu cầu thế chân:</span><span class="font-bold text-yellow-700">${secMethodText}</span></div>
                         </div>
                     </div>
                 `;
             });
-            html += '</div>';
-            resultsContainer.innerHTML = html;
+            html += '</div>'; resultsContainer.innerHTML = html;
         }
 
-        // LOGIC TÍNH TIỀN (ĐÃ TÍCH HỢP PHỤ PHÍ ĐI XA)
         function calculateRentalData(startStr, endStr, carPrice = 0, isFar = false) {
-            const start = new Date(startStr); const end = new Date(endStr); 
-            let totalDays = 0; let surcharge = 0; let notes = []; 
-
-            if (start.getHours() >= 21) { notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng."); }
-
+            const start = new Date(startStr); const end = new Date(endStr); let totalDays = 0; let surcharge = 0; let notes = []; 
+            if (start.getHours() >= 21) notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng.");
             let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
             let endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-
             while (currentDay <= endDay) {
-                let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); 
-                let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0); 
-                let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); 
-                let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
-                
+                let b1Start = new Date(currentDay); b1Start.setHours(7, 0, 0, 0); let b1End = new Date(currentDay); b1End.setHours(15, 0, 0, 0); let b2Start = new Date(currentDay); b2Start.setHours(15, 0, 0, 0); let b2End = new Date(currentDay); b2End.setHours(22, 0, 0, 0);
                 let dayAdded = 0;
-                if (start < b1End && end > b1Start) { dayAdded += 0.5; }
+                if (start < b1End && end > b1Start) dayAdded += 0.5;
                 if (start < b2End && end > b2Start) {
-                    let ignoreAfternoon = false;
-                    if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()) {
-                        if (start.getHours() >= 21) { ignoreAfternoon = true; }
-                    }
+                    let ignoreAfternoon = false; if (currentDay.getTime() === new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()) { if (start.getHours() >= 21) ignoreAfternoon = true; }
                     if (!ignoreAfternoon) dayAdded += 0.5;
                 }
-
                 if (currentDay.getTime() === endDay.getTime()) {
                     let endTimeInHours = end.getHours() + (end.getMinutes() / 60);
                     if (endTimeInHours > 22 && endTimeInHours < 24) {
-                        let rawSurcharge = (endTimeInHours - 22) * 100000;
-                        surcharge += Math.round(rawSurcharge);
-                        let phutTra = end.getMinutes() === 0 ? '00' : end.getMinutes();
-                        notes.push(`*Phụ phí trả xe muộn (lúc ${end.getHours()}h${phutTra}): ${Math.round(rawSurcharge).toLocaleString()}đ`);
+                        let rawSurcharge = (endTimeInHours - 22) * 100000; surcharge += Math.round(rawSurcharge);
+                        let phutTra = end.getMinutes() === 0 ? '00' : end.getMinutes(); notes.push(`*Phụ phí trả xe muộn (lúc ${end.getHours()}h${phutTra}): ${Math.round(rawSurcharge).toLocaleString()}đ`);
                     }
                 }
-
                 if (currentDay.getTime() === endDay.getTime() && currentDay > new Date(start.getFullYear(), start.getMonth(), start.getDate())) {
-                    let endHour = end.getHours();
-                    if (endHour >= 0 && endHour < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) {
-                        dayAdded += 0.5;
-                    }
+                    let endHour = end.getHours(); if (endHour >= 0 && endHour < 7 && end > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)) dayAdded += 0.5;
                 }
-
-                totalDays += dayAdded;
-                currentDay.setDate(currentDay.getDate() + 1);
+                totalDays += dayAdded; currentDay.setDate(currentDay.getDate() + 1);
             }
-
-            if (totalDays === 0 && end > start && start.getHours() < 21) { totalDays = 0.5; }
-
-            // XỬ LÝ CỘNG PHỤ PHÍ ĐI XA DỰA TRÊN SỐ NGÀY THUÊ
-            if (isFar && totalDays > 0) {
-                let farSurcharge = totalDays * 200000;
-                surcharge += farSurcharge;
-                notes.push(`*Phụ phí đi xa ngoại tỉnh (${totalDays} ngày): ${farSurcharge.toLocaleString()}đ`);
-            }
-
+            if (totalDays === 0 && end > start && start.getHours() < 21) totalDays = 0.5; 
+            if (isFar && totalDays > 0) { let farSurcharge = totalDays * 200000; surcharge += farSurcharge; notes.push(`*Phụ phí đi xa ngoại tỉnh (${totalDays} ngày): ${farSurcharge.toLocaleString()}đ`); }
             return { days: totalDays, surcharge: surcharge, totalCost: (totalDays * carPrice) + surcharge, note: notes.join('<br>') };
         }
 
@@ -299,59 +258,54 @@
                     const bookedStart = new Date(b.startTime).getTime(); const bookedEnd = new Date(b.endTime).getTime();
                     if (start < bookedEnd && end > bookedStart) return false;
                 }
-            }
-            return true;
+            } return true;
         }
 
         window.renderCars = function(carArray, showStatus = false) {
             const list = document.getElementById('car-list'); list.innerHTML = '';
-            const startStr = document.getElementById('startTime').value;
-            const endStr = document.getElementById('endTime').value;
+            const startStr = document.getElementById('startTime').value; const endStr = document.getElementById('endTime').value;
             const isFar = document.getElementById('travelArea').value === 'far';
 
             carArray.forEach(car => {
                 let isAvailable = true;
                 let priceHTML = `<p class="text-gray-500 font-medium mt-2 text-lg">Giá: <span class="font-bold text-gray-800">${car.price.toLocaleString()} đ</span> / Ngày</p>`;
+                
+                // HIỂN THỊ YÊU CẦU CỌC TRÊN THẺ XE
+                const secDepositText = car.securityDeposit ? car.securityDeposit.toLocaleString() + 'đ' : 'Thỏa thuận';
+                const secTypeText = car.depositType === 'money_or_bike' ? '(Tiền hoặc Xe máy)' : '(Chỉ nhận Tiền)';
+                const depositInfoHTML = `<p class="text-xs font-bold text-yellow-700 mt-1 mb-2 bg-yellow-50 inline-block px-2 py-1 rounded">Thế chân: ${secDepositText} ${secTypeText}</p>`;
+
                 let buttonHTML = `<button onclick="window.openModal('${car.id}')" class="mt-4 w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-md uppercase tracking-wide">Chọn Thuê Xe Này</button>`;
                 let cardStyle = "";
-
-                let imageGalleryHTML = '';
-                const imageArray = car.images || (car.image ? [car.image] : []);
-                
+                let imageGalleryHTML = ''; const imageArray = car.images || (car.image ? [car.image] : []);
                 if (imageArray.length > 0) {
                     const mainImage = imageArray[0]; 
-                    let thumbnails = imageArray.map(img => `
-                        <img src="${img}" class="w-16 h-12 object-cover rounded cursor-pointer hover:opacity-75 border-2 border-transparent hover:border-green-400 flex-shrink-0" onclick="this.parentElement.previousElementSibling.src='${img}'">
-                    `).join('');
-                    
+                    let thumbnails = imageArray.map(img => `<img src="${img}" class="w-16 h-12 object-cover rounded cursor-pointer hover:opacity-75 border-2 border-transparent hover:border-green-400 flex-shrink-0" onclick="this.parentElement.previousElementSibling.src='${img}'">`).join('');
                     imageGalleryHTML = `<img src="${mainImage}" class="h-56 w-full object-cover main-img transition-all duration-300" onerror="this.src='https://via.placeholder.com/800x400?text=Loi+Anh'"><div class="flex gap-2 p-2 overflow-x-auto bg-gray-100 shadow-inner">${thumbnails}</div>`;
-                } else {
-                    imageGalleryHTML = `<img src="https://via.placeholder.com/800x400?text=Chua+Co+Anh" class="h-56 w-full object-cover">`;
-                }
+                } else { imageGalleryHTML = `<img src="https://via.placeholder.com/800x400?text=Chua+Co+Anh" class="h-56 w-full object-cover">`; }
 
-                const specsHTML = `<div class="flex flex-wrap gap-2 mt-3 text-xs font-semibold text-gray-600"><span class="bg-gray-100 px-2 py-1 rounded border">${car.brand || 'Khác'}</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.seats || '?'} chỗ</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.bodyType || 'Xe'}</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.transmission || '?'}</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.fuel || '?'}</span></div>`;
+                const specsHTML = `<div class="flex flex-wrap gap-2 mt-2 text-xs font-semibold text-gray-600"><span class="bg-gray-100 px-2 py-1 rounded border">${car.brand || 'Khác'}</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.seats || '?'} chỗ</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.bodyType || 'Xe'}</span><span class="bg-gray-100 px-2 py-1 rounded border">${car.transmission || '?'}</span></div>`;
 
                 if (showStatus && isTimeSelected) {
                     isAvailable = isCarAvailable(car.id, startStr, endStr);
                     if (isAvailable) {
                         const rentalData = calculateRentalData(startStr, endStr, car.price, isFar);
                         const noteHTML = rentalData.note ? `<p class="text-xs text-red-600 mt-2 font-bold">${rentalData.note}</p>` : '';
-                        priceHTML = `<div class="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200"><p class="text-blue-900 font-black text-xl">Tổng: ${rentalData.totalCost.toLocaleString()} đ</p><p class="text-sm text-blue-700 font-semibold">(Cho ${rentalData.days} ngày thuê)</p>${noteHTML}</div>`;
+                        priceHTML = `<div class="mt-2 p-4 bg-blue-50 rounded-lg border border-blue-200"><p class="text-blue-900 font-black text-xl">Tổng: ${rentalData.totalCost.toLocaleString()} đ</p><p class="text-sm text-blue-700 font-semibold">(Cho ${rentalData.days} ngày thuê)</p>${noteHTML}</div>`;
                     } else {
                         cardStyle = "opacity-75 grayscale";
-                        priceHTML = `<div class="mt-3 p-4 bg-red-50 rounded-lg border border-red-200"><p class="text-red-700 font-black text-xl">Trùng lịch</p><p class="text-sm text-red-600 font-semibold">Đã có khách đặt trong khung giờ này</p></div>`;
+                        priceHTML = `<div class="mt-2 p-4 bg-red-50 rounded-lg border border-red-200"><p class="text-red-700 font-black text-xl">Trùng lịch</p><p class="text-sm text-red-600 font-semibold">Đã có khách đặt trong khung giờ này</p></div>`;
                         buttonHTML = `<button disabled class="mt-4 w-full bg-gray-400 text-white font-bold py-3 rounded-lg cursor-not-allowed uppercase">Đã Có Khách Đặt</button>`;
                     }
                 }
 
-                list.innerHTML += `<div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col transition-all hover:shadow-2xl hover:-translate-y-1 duration-300 ${cardStyle}">${imageGalleryHTML}<div class="p-5 flex-grow flex flex-col justify-between"><div><h3 class="text-2xl font-black text-gray-800">${car.name}</h3>${specsHTML}${priceHTML}</div>${buttonHTML}</div></div>`;
+                list.innerHTML += `<div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col transition-all hover:shadow-2xl hover:-translate-y-1 duration-300 ${cardStyle}">${imageGalleryHTML}<div class="p-5 flex-grow flex flex-col justify-between"><div><h3 class="text-2xl font-black text-gray-800">${car.name}</h3>${depositInfoHTML}${specsHTML}${priceHTML}</div>${buttonHTML}</div></div>`;
             });
         }
 
         window.searchAvailableCars = function() {
             const start = document.getElementById('startTime').value; const end = document.getElementById('endTime').value;
-            const area = document.getElementById('travelArea').value;
-            const destInput = document.getElementById('travelDestination').value.trim();
+            const area = document.getElementById('travelArea').value; const destInput = document.getElementById('travelDestination').value.trim();
             const msg = document.getElementById('search-msg');
             
             if (!start || !end) { msg.innerText = "Vui lòng chọn đầy đủ thời gian nhận và trả xe!"; msg.classList.remove('hidden'); return; }
@@ -364,8 +318,6 @@
             msg.classList.add('hidden'); isTimeSelected = true;
             document.getElementById('list-title').innerText = "Trạng thái xe trống theo lịch trình của bạn";
             window.renderCars(dynamicCars, true);
-            
-            // Tự động cuộn xuống danh sách xe cho khách hàng dễ nhìn
             document.getElementById('list-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -373,6 +325,18 @@
             if (!isTimeSelected) { alert("Vui lòng chọn Thời gian trước!"); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
             pendingCarSelection = dynamicCars.find(c => c.id === carId);
             document.getElementById('modal-car-name').innerText = `Xe đã chọn: ${pendingCarSelection.name}`;
+            
+            // THIẾT LẬP DROPDOWN HÌNH THỨC THẾ CHÂN DỰA VÀO QUY ĐỊNH CỦA XE
+            const secSelect = document.getElementById('securityMethod');
+            secSelect.innerHTML = '';
+            const secAmount = pendingCarSelection.securityDeposit ? pendingCarSelection.securityDeposit.toLocaleString() : '0';
+            if (pendingCarSelection.depositType === 'money_or_bike') {
+                secSelect.innerHTML = `<option value="money">Thế chân bằng Tiền mặt (${secAmount}đ)</option>
+                                       <option value="bike">Thế chân bằng Xe máy (Kèm cavet chính chủ)</option>`;
+            } else {
+                secSelect.innerHTML = `<option value="money">Chỉ thế chân bằng Tiền mặt (${secAmount}đ)</option>`;
+            }
+
             document.getElementById('booking-modal').classList.remove('hidden');
         }
 
@@ -388,44 +352,40 @@
             const isFar = area === 'far';
             const routeStr = isFar ? `Đi xa: ${document.getElementById('travelDestination').value.trim()}` : `Nội thành Đà Lạt & Lân cận`;
 
+            // LẤY THÔNG TIN CỌC
+            const bookingDepositAmount = parseInt(document.getElementById('bookingDepositAmount').value);
+            const securityMethod = document.getElementById('securityMethod').value;
+            const securityDepositAmount = pendingCarSelection.securityDeposit || 0;
+
             if(!name || !phone) { alert("Vui lòng điền tối thiểu Tên và Số điện thoại!"); return; }
 
-            document.getElementById('btn-submit').innerText = "Đang xử lý...";
-            document.getElementById('btn-submit').disabled = true;
+            document.getElementById('btn-submit').innerText = "Đang xử lý..."; document.getElementById('btn-submit').disabled = true;
 
-            const startStr = document.getElementById('startTime').value;
-            const endStr = document.getElementById('endTime').value;
+            const startStr = document.getElementById('startTime').value; const endStr = document.getElementById('endTime').value;
             const rentalData = calculateRentalData(startStr, endStr, pendingCarSelection.price, isFar);
 
             const newBooking = {
                 timestamp: Date.now(),
-                carId: pendingCarSelection.id, 
-                carName: pendingCarSelection.name,
-                customerName: name, 
-                phone: phone, 
-                deliveryAddress: delivery, 
-                returnAddress: returnAdd,
-                route: routeStr, // Lưu thông tin lộ trình vào CSDL
-                startTime: startStr, 
-                endTime: endStr, 
+                carId: pendingCarSelection.id, carName: pendingCarSelection.name,
+                customerName: name, phone: phone, 
+                deliveryAddress: delivery, returnAddress: returnAdd,
+                route: routeStr,
+                startTime: startStr, endTime: endStr, 
                 totalCost: rentalData.totalCost, 
+                // Bổ sung dữ liệu tài chính
+                bookingDeposit: bookingDepositAmount,
+                securityMethod: securityMethod,
+                securityDepositAmount: securityDepositAmount,
                 status: 'Chờ chủ xe duyệt'
             };
 
             try {
                 await addDoc(collection(db, "bookings"), newBooking);
-                
                 document.getElementById('customerName').value = ''; document.getElementById('customerPhone').value = '';
                 document.getElementById('deliveryAddress').value = ''; document.getElementById('returnAddress').value = '';
-                
-                window.closeModal();
-                alert("Đặt xe thành công! Bạn có thể sử dụng SĐT vừa nhập để tra cứu tình trạng đơn hàng.");
-            } catch (error) {
-                console.error("Lỗi:", error); alert("Có lỗi xảy ra, vui lòng thử lại!");
-            } finally {
-                document.getElementById('btn-submit').innerText = "Xác nhận Đặt";
-                document.getElementById('btn-submit').disabled = false;
-            }
+                window.closeModal(); alert("Đặt xe thành công! Bạn có thể sử dụng SĐT vừa nhập để tra cứu tình trạng đơn hàng.");
+            } catch (error) { console.error("Lỗi:", error); alert("Có lỗi xảy ra, vui lòng thử lại!");
+            } finally { document.getElementById('btn-submit').innerText = "Xác nhận Đặt"; document.getElementById('btn-submit').disabled = false; }
         }
     </script>
 </body>

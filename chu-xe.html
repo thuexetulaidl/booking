@@ -374,40 +374,31 @@
         }
 
         // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN (NÂNG CẤP)
-        window.ownerApprove = async function(firebaseId, currentTotalCost) {
-            // Hiện hộp thoại cho phép chủ xe nhập phụ phí
-            let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
-            
-            if (feeInput === null) return; // Nếu chủ xe bấm Hủy thì dừng lại
+        // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN
+window.ownerApprove = async function(firebaseId, currentTotalCost) {
+    let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
+    if (feeInput === null) return; 
 
-            // Lọc bỏ dấu phẩy/chấm nếu chủ xe gõ (VD: 200,000)
-            let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
-            
-            if (isNaN(deliveryFee) || deliveryFee < 0) {
-                alert("Vui lòng nhập số tiền hợp lệ!"); return;
-            }
+    let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
+    if (isNaN(deliveryFee) || deliveryFee < 0) {
+        alert("Vui lòng nhập số tiền hợp lệ!"); return;
+    }
 
-            // Cộng phụ phí vào tổng tiền
-            let newTotalCost = currentTotalCost + deliveryFee;
-            // Xác định trạng thái tiếp theo
-            let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
+    let newTotalCost = currentTotalCost + deliveryFee;
+    let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
 
-            try {
-                await updateDoc(doc(db, "bookings", firebaseId), { 
-                    status: newStatus,
-                    deliveryFee: deliveryFee,
-                    totalCost: newTotalCost
-                });
-                
-                if(deliveryFee > 0) {
-                    alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Hệ thống đang chờ khách hàng xác nhận!`);
-                } else {
-                    alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
-                }
-            } catch (error) {
-                console.error(error); alert("Lỗi khi duyệt đơn!");
-            }
-        }
+    try {
+        await updateDoc(doc(db, "bookings", firebaseId), { 
+            status: newStatus,
+            deliveryFee: deliveryFee,
+            totalCost: newTotalCost
+        });
+        if(deliveryFee > 0) alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Chờ khách xác nhận!`);
+        else alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
+    } catch (error) {
+        console.error(error); alert("Lỗi khi duyệt đơn!");
+    }
+}
         // HÀM XỬ LÝ MỞ KHÓA LỊCH CHO CHỦ XE
         // Hàm này nhận vào ID của đơn khóa lịch trên Firebase và thực hiện xóa nó
         window.unblockCar = async function(firebaseId) { 

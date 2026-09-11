@@ -123,7 +123,26 @@
         let globalBookings = []; let myCars = []; let globalOwners = []; 
         let currentOwnerId = null; let currentEditingId = null;
 
-        const flatpickrConfig = { enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, locale: "vn" };
+        // CẤU HÌNH LỊCH NÂNG CẤP (Ép dùng giao diện Web và làm tròn 30 phút)
+        const flatpickrConfig = { 
+            enableTime: true, 
+            dateFormat: "Y/m/d H:i", 
+            time_24hr: true, 
+            minuteIncrement: 30, 
+            locale: "vn", 
+            disableMobile: true, // Chặn giao diện lịch mặc định của iPhone/Android
+            allowInput: false,   // Chặn gõ tay
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    let d = selectedDates[0]; let m = d.getMinutes();
+                    if (m !== 0 && m !== 30) {
+                        let roundedMins = (m < 15) ? 0 : ((m < 45) ? 30 : 0);
+                        if (m >= 45) d.setHours(d.getHours() + 1); 
+                        d.setMinutes(roundedMins); instance.setDate(d);
+                    }
+                }
+            }
+        };
         flatpickr("#blockStartTime", flatpickrConfig); flatpickr("#blockEndTime", flatpickrConfig); flatpickr("#newEndTime", flatpickrConfig);
 
         onSnapshot(collection(db, "owners"), (snapshot) => { globalOwners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); });
@@ -169,7 +188,7 @@
             });
         }
 
-        // ================= TÍNH NĂNG MỚI: GỬI HỒ SƠ ĐĂNG KÝ =================
+        // TÍNH NĂNG GỬI HỒ SƠ ĐĂNG KÝ 
         window.submitRegistration = async function() {
             // Lấy dữ liệu Chủ Xe
             const ownerName = document.getElementById('regOwnerName').value.trim();
@@ -226,7 +245,6 @@
             }
         }
 
-        // ================= CÁC HÀM CŨ CỦA CHỦ XE BÊN TRONG =================
         window.addCar = async function() {
             const brand = document.getElementById('newCarBrand').value; const name = document.getElementById('newCarName').value.trim(); const fuel = document.getElementById('newCarFuel').value; const transmission = document.getElementById('newCarTransmission').value; const bodyType = document.getElementById('newCarBodyType').value; const seats = document.getElementById('newCarSeats').value; const price = parseInt(document.getElementById('newCarPrice').value); const securityDeposit = parseInt(document.getElementById('newCarSecurityDeposit').value); const depositType = document.getElementById('newCarDepositType').value; const imageFiles = document.getElementById('newCarImages').files;
             if(!brand || !name || !price || !securityDeposit) { alert("Điền đủ thông tin!"); return; }
@@ -238,6 +256,43 @@
                 await addDoc(collection(db, "cars"), { ownerId: currentOwnerId, brand: brand, name: name, fuel: fuel, transmission: transmission, bodyType: bodyType, seats: parseInt(seats), price: price, securityDeposit: securityDeposit, depositType: depositType, images: uploadedImageUrls });
                 alert("Đăng xe thành công!"); window.closeAddCarModal();
             } catch (error) { console.error(error); alert("Lỗi tải ảnh!"); } finally { btn.innerText = "Đăng Xe"; btn.disabled = false; }
+        }
+
+        // HÀM KHÓA LỊCH ĐÃ ĐƯỢC CHỈNH SỬA VÀ TRÌNH BÀY RÕ RÀNG
+        window.blockCarSchedule = async function() {
+            const carId = document.getElementById('blockCarSelect').value; 
+            const startStr = document.getElementById('blockStartTime').value; 
+            const endStr = document.getElementById('blockEndTime').value;
+            
+            if(!carId || !startStr || !endStr) {
+                alert("Vui lòng chọn xe và đầy đủ thời gian để khóa lịch!");
+                return; 
+            }
+
+            const selectedCar = myCars.find(c => c.id === carId);
+            const carNameToSave = selectedCar ? selectedCar.name : "Khóa Lịch";
+
+            try { 
+                await addDoc(collection(db, "bookings"), { 
+                    timestamp: Date.now(), 
+                    carId: carId, 
+                    carName: carNameToSave, 
+                    customerName: "Chủ xe (Tự khóa)", 
+                    phone: currentOwnerId, 
+                    startTime: startStr, 
+                    endTime: endStr, 
+                    totalCost: 0, 
+                    status: 'Đã khóa lịch' 
+                }); 
+                
+                alert("Khóa lịch thành công!"); 
+                document.getElementById('blockStartTime').value = '';
+                document.getElementById('blockEndTime').value = '';
+                window.closeBlockScheduleModal(); 
+            } catch (error) { 
+                console.error(error); 
+                alert("Có lỗi kết nối, vui lòng thử lại!");
+            }
         }
 
         function formatDateTime(dateString) { const d = new Date(dateString); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; }

@@ -183,13 +183,13 @@
             myBookings.forEach(b => {
                 let statusColor = 'bg-gray-200 text-gray-800';
                 if (b.status === 'Chờ chủ xe duyệt') statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                if (b.status === 'Chờ khách xác nhận') statusColor = 'bg-orange-100 text-orange-800 border-orange-400 border-2 shadow-md';
                 if (b.status === 'Đợi cọc') statusColor = 'bg-blue-100 text-blue-800 border-blue-300';
                 if (b.status === 'Đã xác nhận') statusColor = 'bg-green-100 text-green-800 border-green-300';
                 if (b.status === 'Đã thu hồi') statusColor = 'bg-gray-200 text-gray-600 border-gray-300';
+                if (b.status === 'Khách đã hủy') statusColor = 'bg-red-50 text-red-800 border-red-300 opacity-75 grayscale';
                 
                 const routeInfo = b.route ? `<p class="text-sm text-gray-600 mt-3">Lộ trình: <span class="font-semibold">${b.route}</span></p>` : '';
-                
-                // BỔ SUNG ĐỊA CHỈ GIAO VÀ TRẢ XE
                 const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau';
                 const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
                 
@@ -202,6 +202,23 @@
                 if (b.securityMethod === 'money') secMethodText = `Tiền mặt (${secDepAmount.toLocaleString()}đ)`;
                 if (b.securityMethod === 'bike') secMethodText = `Xe máy kèm cavet`;
 
+                // Hiển thị dòng Phụ phí nếu có
+                let deliveryFeeHTML = '';
+                if (b.deliveryFee && b.deliveryFee > 0) {
+                    deliveryFeeHTML = `<div class="flex justify-between mb-1"><span class="text-gray-600 font-semibold">Phụ phí giao xe (Chủ xe báo):</span><span class="font-black text-orange-600">+ ${b.deliveryFee.toLocaleString()}đ</span></div>`;
+                }
+
+                // Cụm 2 nút tương tác dành cho khách hàng
+                let actionBtnsHTML = '';
+                if (b.status === 'Chờ khách xác nhận') {
+                    actionBtnsHTML = `
+                        <div class="mt-4 pt-3 border-t border-gray-300 flex gap-3">
+                            <button onclick="window.acceptFee('${b.firebaseId}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold w-full shadow-lg transition">Đồng ý thuê</button>
+                            <button onclick="window.cancelBooking('${b.firebaseId}')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-bold w-full shadow transition">Hủy đơn</button>
+                        </div>
+                    `;
+                }
+
                 html += `
                     <div class="border-2 p-4 rounded-lg shadow-sm ${statusColor}">
                         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2">
@@ -209,32 +226,42 @@
                             <span class="px-3 py-1 rounded-full text-xs font-black uppercase bg-white bg-opacity-50 shadow-sm">${b.status}</span>
                         </div>
                         
-                        <!-- KHỐI HIỂN THỊ THỜI GIAN VÀ ĐỊA ĐIỂM CHI TIẾT -->
                         <div class="space-y-2 mb-2">
-                            <div>
-                                <p class="text-sm text-gray-800">Lấy xe: <span class="font-bold">${formatDateTime(b.startTime)}</span></p>
-                                <p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Giao tại: <span class="font-semibold">${delAdd}</span></p>
-                            </div>
-                            <div class="pt-2">
-                                <p class="text-sm text-gray-800">Trả xe: <span class="font-bold">${formatDateTime(b.endTime)}</span></p>
-                                <p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Trả tại: <span class="font-semibold">${retAdd}</span></p>
-                            </div>
+                            <div><p class="text-sm text-gray-800">Lấy xe: <span class="font-bold">${formatDateTime(b.startTime)}</span></p><p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Giao tại: <span class="font-semibold">${delAdd}</span></p></div>
+                            <div class="pt-2"><p class="text-sm text-gray-800">Trả xe: <span class="font-bold">${formatDateTime(b.endTime)}</span></p><p class="text-sm text-gray-600 pl-4 border-l-2 border-gray-400 mt-1">Trả tại: <span class="font-semibold">${retAdd}</span></p></div>
                         </div>
                         
                         ${routeInfo}
                         
                         <div class="mt-4 pt-3 border-t border-gray-300 border-opacity-50 text-sm">
-                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tổng tiền thuê xe:</span><span class="font-bold text-gray-800">${b.totalCost.toLocaleString()}đ</span></div>
+                            ${deliveryFeeHTML}
+                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tổng tiền cuối cùng:</span><span class="font-bold text-gray-800">${b.totalCost.toLocaleString()}đ</span></div>
                             <div class="flex justify-between mb-1"><span class="text-gray-600">Đã cọc giữ chỗ:</span><span class="font-bold text-blue-600">- ${depositPaid.toLocaleString()}đ</span></div>
-                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tiền thuê còn lại:</span><span class="font-bold text-red-600">${remainingRental.toLocaleString()}đ</span></div>
+                            <div class="flex justify-between mb-1"><span class="text-gray-600">Tiền cần thanh toán thêm:</span><span class="font-bold text-red-600">${remainingRental.toLocaleString()}đ</span></div>
                             <div class="flex justify-between mb-1 mt-2 pt-2 border-t border-dashed border-gray-300"><span class="font-bold text-gray-700">Yêu cầu thế chân:</span><span class="font-bold text-yellow-700">${secMethodText}</span></div>
                         </div>
+                        ${actionBtnsHTML}
                     </div>
                 `;
             });
             html += '</div>'; resultsContainer.innerHTML = html;
         }
 
+        // HÀM XỬ LÝ KHÁCH HÀNG ĐỒNG Ý PHỤ PHÍ
+        window.acceptFee = async function(firebaseId) {
+            if(confirm("Xác nhận ĐỒNG Ý với mức phụ phí này và tiến hành thuê xe?")) {
+                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' });
+                alert("Xác nhận thành công! Vui lòng chờ bộ phận Quản lý liên hệ để thu cọc.");
+            }
+        }
+
+        // HÀM XỬ LÝ KHÁCH HÀNG HỦY ĐƠN
+        window.cancelBooking = async function(firebaseId) {
+            if(confirm("Bạn chắc chắn muốn HỦY đơn đặt xe này?")) {
+                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Khách đã hủy' });
+                alert("Đơn đặt xe đã được hủy thành công.");
+            }
+        }
         function calculateRentalData(startStr, endStr, carPrice = 0, isFar = false) {
             const start = new Date(startStr); const end = new Date(endStr); let totalDays = 0; let surcharge = 0; let notes = []; 
             if (start.getHours() >= 21) notes.push("*Nhận xe muộn (sau 21h): Phụ phí sẽ do chủ xe thông báo riêng.");

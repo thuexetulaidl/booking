@@ -126,6 +126,22 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        // CẤU HÌNH BOT TELEGRAM CỦA ADMIN
+        const TELEGRAM_BOT_TOKEN = "8528480103:AAEQL1Q2MA4oJecYqo3Gqk9YTSJRgJ82bKE";
+        const TELEGRAM_CHAT_ID = "8903656612";
+
+        async function sendTelegramNotification(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
+                });
+            } catch (error) {
+                console.error("Lỗi gửi thông báo Telegram:", error);
+            }
+        }
 
         let globalBookings = []; let dynamicCars = []; let isTimeSelected = false; let pendingCarSelection = null;
 
@@ -422,6 +438,24 @@
 
             try {
                 await addDoc(collection(db, "bookings"), newBooking);
+                // --- BẮT ĐẦU GỬI THÔNG BÁO TELEGRAM ---
+                // Phân biệt xe của Admin (679195) và xe của người khác
+                const ownerAlertText = pendingCarSelection.ownerId === '679195' 
+                    ? "⭐ CÓ KHÁCH ĐẶT XE CỦA BẠN (679195)!" 
+                    : `🔔 CÓ KHÁCH ĐẶT XE (Chủ xe ID: ${pendingCarSelection.ownerId})`;
+
+                const teleMessage = `
+${ownerAlertText}
+🚗 Xe: <b>${pendingCarSelection.name}</b>
+👤 Khách hàng: <b>${name}</b>
+📞 SĐT: <b>${phone}</b>
+📅 Lấy xe: <b>${formatDateTime(startStr)}</b>
+📅 Trả xe: <b>${formatDateTime(endStr)}</b>
+📍 Lộ trình: ${routeStr}
+💰 Tổng tiền: <b>${rentalData.totalCost.toLocaleString()}đ</b>
+                `;
+                await sendTelegramNotification(teleMessage);
+                // --- KẾT THÚC GỬI THÔNG BÁO TELEGRAM ---
                 document.getElementById('customerName').value = ''; document.getElementById('customerPhone').value = '';
                 document.getElementById('deliveryAddress').value = ''; document.getElementById('returnAddress').value = '';
                 window.closeModal(); alert("Đặt xe thành công! Bạn có thể sử dụng SĐT vừa nhập để tra cứu tình trạng đơn hàng.");

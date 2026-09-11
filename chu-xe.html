@@ -246,7 +246,8 @@
                 };
 
                 await addDoc(collection(db, "pending_registrations"), registrationData);
-                
+                // GỬI TELEGRAM BÁO ĐĂNG KÝ
+                await window.sendTelegramNotification(`📝 <b>CÓ CHỦ XE ĐĂNG KÝ MỚI!</b>\n👤 Tên: <b>${ownerName}</b>\n📞 SĐT: <b>${ownerPhone}</b>\n🔑 ID: <b>${loginId}</b>\n🚗 Xe: <b>${brand} ${name}</b>`);
                 alert("Đăng ký thành công! Vui lòng chờ Quản lý duyệt hồ sơ để bắt đầu hoạt động.");
                 window.closeRegisterModal();
                 

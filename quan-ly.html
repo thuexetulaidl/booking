@@ -26,12 +26,13 @@
         </div>
 
         <div id="admin-workspace" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <button onclick="window.openOwnerModal()" class="bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1">
-                    👥 Quản Lý Tài Khoản Chủ Xe
-                </button>
-                <button onclick="window.openStatsModal()" class="bg-teal-600 text-white py-4 rounded-xl font-bold hover:bg-teal-700 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1">
-                    📊 Báo Cáo Thống Kê Tổng Hợp
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <button onclick="window.openOwnerModal()" class="bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1">👥 Quản Lý Tài Khoản Chủ Xe</button>
+                <button onclick="window.openStatsModal()" class="bg-teal-600 text-white py-4 rounded-xl font-bold hover:bg-teal-700 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1">📊 Báo Cáo Thống Kê Tổng Hợp</button>
+                <button onclick="window.openPendingModal()" class="bg-orange-500 text-white py-4 rounded-xl font-bold hover:bg-orange-600 shadow-lg flex items-center justify-center gap-2 text-lg transition transform hover:-translate-y-1 relative">
+                    🔔 Yêu Cầu Đăng Ký Mới
+                    <!-- Badge số lượng yêu cầu mới sẽ được tiêm vào đây qua JS -->
+                    <span id="pending-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-black px-2 py-1 rounded-full shadow-md animate-pulse">0</span>
                 </button>
             </div>
 
@@ -40,13 +41,7 @@
             <div class="bg-white rounded-lg shadow-xl overflow-x-auto border border-gray-200">
                 <table class="min-w-full bg-white text-sm">
                     <thead class="bg-red-800 text-white">
-                        <tr>
-                            <th class="py-4 px-4 text-left font-bold">Thông tin Khách & Xe</th>
-                            <th class="py-4 px-4 text-left font-bold">Chi tiết Lịch trình</th>
-                            <th class="py-4 px-4 text-left font-bold">Tài chính & Thu cọc</th>
-                            <th class="py-4 px-4 text-left font-bold">Trạng thái</th>
-                            <th class="py-4 px-4 text-center font-bold">Thao tác Admin</th>
-                        </tr>
+                        <tr><th class="py-4 px-4 text-left font-bold">Thông tin Khách & Xe</th><th class="py-4 px-4 text-left font-bold">Chi tiết Lịch trình</th><th class="py-4 px-4 text-left font-bold">Tài chính & Thu cọc</th><th class="py-4 px-4 text-left font-bold">Trạng thái</th><th class="py-4 px-4 text-center font-bold">Thao tác Admin</th></tr>
                     </thead>
                     <tbody id="manager-table-body" class="divide-y divide-gray-200"></tbody>
                 </table>
@@ -54,67 +49,63 @@
         </div>
     </div>
 
-    <!-- MODAL QUẢN LÝ CHỦ XE -->
-    <div id="modal-manage-owners" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-indigo-700 p-4 flex justify-between items-center text-white">
-                <h2 class="text-xl font-bold">Quản Lý Tài Khoản Chủ Xe</h2>
-                <button onclick="window.closeOwnerModal()" class="text-3xl font-bold hover:text-indigo-200 leading-none">&times;</button>
+    <!-- MODAL DUYỆT ĐĂNG KÝ MỚI (TÍNH NĂNG MỚI) -->
+    <div id="modal-pending-registrations" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-orange-600 p-4 flex justify-between items-center text-white">
+                <h2 class="text-xl font-bold">Danh sách Hồ sơ chờ Duyệt</h2>
+                <button onclick="window.closePendingModal()" class="text-3xl font-bold hover:text-orange-200 leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto flex-grow bg-gray-50">
-                <div class="bg-white p-5 rounded-lg shadow border border-gray-200 mb-6">
-                    <h3 class="font-bold text-indigo-800 mb-4 text-lg">Cấp ID mới cho Chủ xe</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <input type="text" id="newOwnerName" placeholder="Tên chủ xe" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50">
-                        <input type="tel" id="newOwnerPhone" placeholder="Số điện thoại" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50">
-                        <input type="text" id="newOwnerId" placeholder="Mã ID đăng nhập" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50 font-bold text-indigo-700">
-                    </div>
-                    <button onclick="window.createOwner()" class="bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 shadow w-full md:w-auto">Cấp Tài Khoản</button>
-                </div>
-                <h3 class="font-bold text-gray-800 mb-3 text-lg">Danh sách Chủ xe hiện tại</h3>
                 <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
-                    <table class="min-w-full text-sm"><thead class="bg-gray-100 text-gray-700"><tr><th class="py-3 px-4 text-left">Tên Chủ Xe</th><th class="py-3 px-4 text-left">Số Điện Thoại</th><th class="py-3 px-4 text-left">ID Đăng Nhập</th><th class="py-3 px-4 text-center">Thao tác</th></tr></thead><tbody id="owners-list-body" class="divide-y divide-gray-100"></tbody></table>
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-orange-100 text-orange-900 border-b-2 border-orange-200">
+                            <tr><th class="py-3 px-4 text-left font-bold">Thông tin Chủ Xe</th><th class="py-3 px-4 text-left font-bold">Thông số Xe</th><th class="py-3 px-4 text-left font-bold">Tài chính khai báo</th><th class="py-3 px-4 text-center font-bold">Hình ảnh</th><th class="py-3 px-4 text-center font-bold">Phê duyệt</th></tr>
+                        </thead>
+                        <tbody id="pending-table-body" class="divide-y divide-gray-100"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL QUẢN LÝ CHỦ XE CŨ -->
+    <div id="modal-manage-owners" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"><div class="bg-indigo-700 p-4 flex justify-between items-center text-white"><h2 class="text-xl font-bold">Quản Lý Tài Khoản Chủ Xe</h2><button onclick="window.closeOwnerModal()" class="text-3xl font-bold hover:text-indigo-200 leading-none">&times;</button></div><div class="p-6 overflow-y-auto flex-grow bg-gray-50"><div class="bg-white p-5 rounded-lg shadow border border-gray-200 mb-6"><h3 class="font-bold text-indigo-800 mb-4 text-lg">Cấp ID mới (Thủ công)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><input type="text" id="newOwnerName" placeholder="Tên chủ xe" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50"><input type="tel" id="newOwnerPhone" placeholder="Số điện thoại" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50"><input type="text" id="newOwnerId" placeholder="Mã ID đăng nhập" class="border p-3 rounded focus:ring-2 focus:ring-indigo-400 bg-gray-50 font-bold text-indigo-700"></div><button onclick="window.createOwner()" class="bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 shadow w-full md:w-auto">Cấp Tài Khoản</button></div><h3 class="font-bold text-gray-800 mb-3 text-lg">Danh sách Chủ xe hiện tại</h3><div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200"><table class="min-w-full text-sm"><thead class="bg-gray-100 text-gray-700"><tr><th class="py-3 px-4 text-left">Tên Chủ Xe</th><th class="py-3 px-4 text-left">Số Điện Thoại</th><th class="py-3 px-4 text-left">ID Đăng Nhập</th><th class="py-3 px-4 text-center">Thao tác</th></tr></thead><tbody id="owners-list-body" class="divide-y divide-gray-100"></tbody></table></div></div></div></div>
+
     <!-- MODAL THỐNG KÊ -->
-    <div id="modal-statistics" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-teal-700 p-4 flex justify-between items-center text-white">
-                <h2 class="text-xl font-bold">Thống Kê Kinh Doanh Từng Chủ Xe</h2>
-                <button onclick="window.closeStatsModal()" class="text-3xl font-bold hover:text-teal-200 leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow bg-gray-50">
-                <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
-                    <table class="min-w-full text-sm"><thead class="bg-teal-100 text-teal-900 border-b-2 border-teal-200"><tr><th class="py-4 px-4 text-left font-bold">Tên Chủ Xe (ID)</th><th class="py-4 px-4 text-center font-bold">Số lượng xe</th><th class="py-4 px-4 text-center font-bold">Tổng số cuốc (Đã xong)</th><th class="py-4 px-4 text-right font-bold">Tổng doanh thu</th></tr></thead><tbody id="stats-table-body" class="divide-y divide-gray-100"></tbody></table>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="modal-statistics" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"><div class="bg-teal-700 p-4 flex justify-between items-center text-white"><h2 class="text-xl font-bold">Thống Kê Kinh Doanh Từng Chủ Xe</h2><button onclick="window.closeStatsModal()" class="text-3xl font-bold hover:text-teal-200 leading-none">&times;</button></div><div class="p-6 overflow-y-auto flex-grow bg-gray-50"><div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200"><table class="min-w-full text-sm"><thead class="bg-teal-100 text-teal-900 border-b-2 border-teal-200"><tr><th class="py-4 px-4 text-left font-bold">Tên Chủ Xe (ID)</th><th class="py-4 px-4 text-center font-bold">Số lượng xe</th><th class="py-4 px-4 text-center font-bold">Tổng số cuốc (Đã xong)</th><th class="py-4 px-4 text-right font-bold">Tổng doanh thu</th></tr></thead><tbody id="stats-table-body" class="divide-y divide-gray-100"></tbody></table></div></div></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk", authDomain: "thuexetulai-fcd79.firebaseapp.com",
-            projectId: "thuexetulai-fcd79", storageBucket: "thuexetulai-fcd79.firebasestorage.app",
-            messagingSenderId: "984655156691", appId: "1:984655156691:web:ff57df0de4f5f2ee040b26"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const firebaseConfig = { apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk", authDomain: "thuexetulai-fcd79.firebaseapp.com", projectId: "thuexetulai-fcd79", storageBucket: "thuexetulai-fcd79.firebasestorage.app", messagingSenderId: "984655156691", appId: "1:984655156691:web:ff57df0de4f5f2ee040b26" };
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        let globalBookings = []; let globalCars = []; let globalOwners = [];
+        let globalBookings = []; let globalCars = []; let globalOwners = []; let globalPending = [];
 
+        // LẮNG NGHE FIREBASE
         onSnapshot(collection(db, "owners"), (snapshot) => { globalOwners = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); window.renderOwnersList(); window.renderStatistics(); });
         onSnapshot(collection(db, "cars"), (snapshot) => { globalCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); window.renderStatistics(); });
         onSnapshot(collection(db, "bookings"), (snapshot) => { globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); globalBookings.sort((a, b) => b.timestamp - a.timestamp); window.renderManagerTable(); window.renderStatistics(); });
+        
+        // Lắng nghe dữ liệu phòng chờ
+        onSnapshot(collection(db, "pending_registrations"), (snapshot) => { 
+            globalPending = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); 
+            window.renderPendingTable(); 
+            
+            // Cập nhật số lượng thông báo
+            const badge = document.getElementById('pending-badge');
+            if(globalPending.length > 0) {
+                badge.innerText = globalPending.length; badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
 
         window.loginAdmin = function() {
             const pass = document.getElementById('adminPassword').value;
-            if (pass === "1122") { document.getElementById('login-section').classList.add('hidden'); document.getElementById('admin-workspace').classList.remove('hidden'); } 
+            if (pass === "679195") { document.getElementById('login-section').classList.add('hidden'); document.getElementById('admin-workspace').classList.remove('hidden'); } 
             else { alert("Mã PIN không chính xác!"); }
         }
 
@@ -122,18 +113,68 @@
         window.closeOwnerModal = function() { document.getElementById('modal-manage-owners').classList.add('hidden'); }
         window.openStatsModal = function() { document.getElementById('modal-statistics').classList.remove('hidden'); }
         window.closeStatsModal = function() { document.getElementById('modal-statistics').classList.add('hidden'); }
+        
+        // HÀM MỞ PHÒNG CHỜ
+        window.openPendingModal = function() { document.getElementById('modal-pending-registrations').classList.remove('hidden'); }
+        window.closePendingModal = function() { document.getElementById('modal-pending-registrations').classList.add('hidden'); }
 
+        // ================= XỬ LÝ DUYỆT / TỪ CHỐI ĐĂNG KÝ =================
+        window.renderPendingTable = function() {
+            const tbody = document.getElementById('pending-table-body'); tbody.innerHTML = '';
+            if (globalPending.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500 font-bold">Không có yêu cầu đăng ký nào đang chờ duyệt.</td></tr>`; return; }
+
+            globalPending.forEach(reg => {
+                const owner = reg.ownerInfo; const car = reg.carInfo;
+                const secText = car.depositType === 'money' ? `Chỉ Tiền mặt` : `Tiền/Xe máy`;
+                
+                // Trình diễn ảnh siêu nhỏ
+                const imgThumb = (car.images && car.images.length > 0) ? `<img src="${car.images[0]}" class="w-16 h-12 object-cover rounded mx-auto border border-gray-300 shadow-sm">` : 'Không ảnh';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-orange-50 transition">
+                        <td class="py-4 px-4"><span class="font-bold text-gray-800">${owner.name}</span><br><span class="text-sm text-gray-600">${owner.phone}</span><br><span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 rounded">ID: ${owner.loginId}</span></td>
+                        <td class="py-4 px-4"><span class="font-bold text-blue-800">${car.name}</span><br><span class="text-xs text-gray-600">${car.brand} - ${car.bodyType} - ${car.seats} chỗ</span><br><span class="text-xs text-gray-600">${car.transmission} - ${car.fuel}</span></td>
+                        <td class="py-4 px-4"><span class="font-bold text-green-700">Giá: ${car.price.toLocaleString()}đ/ngày</span><br><span class="text-xs text-yellow-700 font-bold">Thế chân: ${car.securityDeposit.toLocaleString()}đ</span><br><span class="text-xs text-gray-500">${secText}</span></td>
+                        <td class="py-4 px-4 text-center">${imgThumb}</td>
+                        <td class="py-4 px-4 text-center">
+                            <div class="flex flex-col gap-2">
+                                <button onclick="window.approveRegistration('${reg.firebaseId}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold shadow hover:bg-green-700">✔️ Duyệt lên Web</button>
+                                <button onclick="window.rejectRegistration('${reg.firebaseId}')" class="bg-gray-400 text-white px-3 py-1 rounded text-sm font-bold shadow hover:bg-gray-500">❌ Xóa / Từ chối</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        window.approveRegistration = async function(docId) {
+            if(!confirm("Xác nhận Duyệt hồ sơ này? Tài khoản chủ xe sẽ được tạo và xe sẽ lập tức hiển thị trên Website cho khách thuê.")) return;
+            try {
+                const reg = globalPending.find(r => r.firebaseId === docId);
+                // 1. Tạo tài khoản chủ xe
+                await addDoc(collection(db, "owners"), reg.ownerInfo);
+                // 2. Đưa xe vào hệ thống chính thức
+                await addDoc(collection(db, "cars"), reg.carInfo);
+                // 3. Xóa khỏi phòng chờ
+                await deleteDoc(doc(db, "pending_registrations", docId));
+                alert("Duyệt thành công! Xe đã lên sàn.");
+            } catch (error) { console.error(error); alert("Lỗi khi duyệt hồ sơ!"); }
+        }
+
+        window.rejectRegistration = async function(docId) {
+            if(!confirm("CẢNH BÁO: Từ chối và Xóa vĩnh viễn hồ sơ đăng ký này?")) return;
+            try { await deleteDoc(doc(db, "pending_registrations", docId)); } catch (error) { console.error(error); }
+        }
+
+        // ================= CÁC HÀM CŨ CỦA QUẢN LÝ BÊN TRONG =================
         window.createOwner = async function() {
             const name = document.getElementById('newOwnerName').value.trim(); const phone = document.getElementById('newOwnerPhone').value.trim(); const loginId = document.getElementById('newOwnerId').value.trim();
-            if(!name || !phone || !loginId) { alert("Vui lòng nhập đủ thông tin!"); return; }
+            if(!name || !phone || !loginId) return;
             if(globalOwners.some(o => o.loginId === loginId)) { alert("Mã ID này đã tồn tại!"); return; }
             try { await addDoc(collection(db, "owners"), { name: name, phone: phone, loginId: loginId }); alert("Cấp ID thành công!"); document.getElementById('newOwnerName').value = ''; document.getElementById('newOwnerPhone').value = ''; document.getElementById('newOwnerId').value = ''; } 
-            catch (error) { console.error(error); alert("Lỗi khi tạo ID!"); }
+            catch (error) { console.error(error); }
         }
 
-        window.deleteOwner = async function(firebaseId, name) {
-            if(confirm(`CẢNH BÁO: Xóa chủ xe "${name}"?`)) { try { await deleteDoc(doc(db, "owners", firebaseId)); alert("Đã xóa chủ xe!"); } catch (error) { console.error(error); } }
-        }
+        window.deleteOwner = async function(firebaseId, name) { if(confirm(`Xóa chủ xe "${name}"?`)) { try { await deleteDoc(doc(db, "owners", firebaseId)); } catch (error) { console.error(error); } } }
 
         window.renderOwnersList = function() {
             const tbody = document.getElementById('owners-list-body'); tbody.innerHTML = '';

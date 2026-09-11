@@ -117,37 +117,37 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk", authDomain: "thuexetulai-fcd79.firebaseapp.com", projectId: "thuexetulai-fcd79", storageBucket: "thuexetulai-fcd79.firebasestorage.app", messagingSenderId: "984655156691", appId: "1:984655156691:web:ff57df0de4f5f2ee040b26" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-        // CẤU HÌNH BOT TELEGRAM CỦA ADMIN
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk", 
+            authDomain: "thuexetulai-fcd79.firebaseapp.com", 
+            projectId: "thuexetulai-fcd79", 
+            storageBucket: "thuexetulai-fcd79.firebasestorage.app", 
+            messagingSenderId: "984655156691", 
+            appId: "1:984655156691:web:ff57df0de4f5f2ee040b26" 
+        };
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
+
+        // CẤU HÌNH BOT TELEGRAM
         const TELEGRAM_BOT_TOKEN = "8528480103:AAEQL1Q2MA4oJecYqo3Gqk9YTSJRgJ82bKE";
         const TELEGRAM_CHAT_ID = "8903656612";
 
-        async function sendTelegramNotification(message) {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        window.sendTelegramNotification = async function(message) {
             try {
-                await fetch(url, {
-                    method: 'POST',
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
                 });
-            } catch (error) {
-                console.error("Lỗi gửi thông báo Telegram:", error);
-            }
+            } catch (error) { console.error("Lỗi Telegram:", error); }
         }
 
         let globalBookings = []; let myCars = []; let globalOwners = []; 
         let currentOwnerId = null; let currentEditingId = null;
 
-        // CẤU HÌNH LỊCH NÂNG CẤP (Ép dùng giao diện Web và làm tròn 30 phút)
         const flatpickrConfig = { 
-            enableTime: true, 
-            dateFormat: "Y/m/d H:i", 
-            time_24hr: true, 
-            minuteIncrement: 30, 
-            locale: "vn", 
-            disableMobile: true, // Chặn giao diện lịch mặc định của iPhone/Android
-            allowInput: false,   // Chặn gõ tay
+            enableTime: true, dateFormat: "Y/m/d H:i", time_24hr: true, minuteIncrement: 30, 
+            locale: "vn", disableMobile: true, allowInput: false,
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
                     let d = selectedDates[0]; let m = d.getMinutes();
@@ -165,20 +165,23 @@
         onSnapshot(collection(db, "bookings"), (snapshot) => { globalBookings = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() })); if (currentOwnerId) { window.renderOwnerTable(); window.renderMyCarsAndRevenue(); } });
         onSnapshot(collection(db, "cars"), (snapshot) => { myCars = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); if (currentOwnerId) { window.populateCarDropdown(); window.renderMyCarsAndRevenue(); } });
 
-        // CÁC HÀM MỞ/ĐÓNG POPUP
         window.openAddCarModal = function() { document.getElementById('modal-add-car').classList.remove('hidden'); }
         window.closeAddCarModal = function() { document.getElementById('modal-add-car').classList.add('hidden'); }
         window.openBlockScheduleModal = function() { document.getElementById('modal-block-schedule').classList.remove('hidden'); }
         window.closeBlockScheduleModal = function() { document.getElementById('modal-block-schedule').classList.add('hidden'); }
-        
         window.openRegisterModal = function() { document.getElementById('modal-register-owner').classList.remove('hidden'); }
         window.closeRegisterModal = function() { document.getElementById('modal-register-owner').classList.add('hidden'); }
 
         window.loginOwner = function() {
-            const inputId = document.getElementById('ownerIdInput').value.trim(); const matchedOwner = globalOwners.find(owner => owner.loginId === inputId);
+            const inputId = document.getElementById('ownerIdInput').value.trim(); 
+            const matchedOwner = globalOwners.find(owner => owner.loginId === inputId);
             if(matchedOwner) {
-                currentOwnerId = matchedOwner.loginId; document.getElementById('display-owner-name').innerText = matchedOwner.name; document.getElementById('display-owner-phone').innerText = matchedOwner.phone; document.getElementById('display-owner-id').innerText = matchedOwner.loginId;
-                document.getElementById('login-section').classList.add('hidden'); document.getElementById('owner-workspace').classList.remove('hidden');
+                currentOwnerId = matchedOwner.loginId; 
+                document.getElementById('display-owner-name').innerText = matchedOwner.name; 
+                document.getElementById('display-owner-phone').innerText = matchedOwner.phone; 
+                document.getElementById('display-owner-id').innerText = matchedOwner.loginId;
+                document.getElementById('login-section').classList.add('hidden'); 
+                document.getElementById('owner-workspace').classList.remove('hidden');
                 window.populateCarDropdown(); window.renderOwnerTable(); window.renderMyCarsAndRevenue(); 
             } else { alert("Sai ID Đăng Nhập hoặc ID của bạn chưa được Quản lý duyệt!"); }
         }
@@ -188,7 +191,6 @@
             myCars.filter(c => c.ownerId === currentOwnerId).forEach(car => { dropdown.innerHTML += `<option value="${car.id}">${car.name}</option>`; });
         }
 
-        // HÀM NÉN ẢNH CHUNG (DÙNG CHO CẢ ĐĂNG KÝ VÀ THÊM XE)
         async function compressImage(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader(); reader.readAsDataURL(file);
@@ -204,62 +206,41 @@
             });
         }
 
-        // TÍNH NĂNG GỬI HỒ SƠ ĐĂNG KÝ 
         window.submitRegistration = async function() {
-            // Lấy dữ liệu Chủ Xe
             const ownerName = document.getElementById('regOwnerName').value.trim();
             const ownerPhone = document.getElementById('regOwnerPhone').value.trim();
-            const loginId = document.getElementById('regOwnerId').value.trim(); // Phân biệt hoa thường giữ nguyên
-            
-            // Lấy dữ liệu Xe
+            const loginId = document.getElementById('regOwnerId').value.trim();
             const brand = document.getElementById('regCarBrand').value; const name = document.getElementById('regCarName').value.trim();
             const fuel = document.getElementById('regCarFuel').value; const transmission = document.getElementById('regCarTransmission').value;
             const bodyType = document.getElementById('regCarBodyType').value; const seats = document.getElementById('regCarSeats').value;
             const price = parseInt(document.getElementById('regCarPrice').value); const securityDeposit = parseInt(document.getElementById('regCarSecurityDeposit').value);
             const depositType = document.getElementById('regCarDepositType').value; const imageFiles = document.getElementById('regCarImages').files;
 
-            // Kiểm tra rỗng
             if(!ownerName || !ownerPhone || !loginId || !brand || !name || !price || !securityDeposit || !fuel || !transmission || !bodyType || !seats) { 
-                alert("Vui lòng điền ĐẦY ĐỦ tất cả các thông tin của Chủ xe và Xe!"); return; 
+                alert("Vui lòng điền ĐẦY ĐỦ thông tin!"); return; 
             }
-            if(imageFiles.length === 0 || imageFiles.length > 5) { alert("Vui lòng chọn từ 1 đến 5 tấm ảnh cho xe!"); return; }
+            if(imageFiles.length === 0 || imageFiles.length > 5) { alert("Vui lòng chọn 1-5 ảnh!"); return; }
+            if(globalOwners.some(o => o.loginId === loginId)) { alert("ID này đã tồn tại!"); return; }
 
-            // Kiểm tra ID trùng trong hệ thống chính
-            if(globalOwners.some(o => o.loginId === loginId)) { alert("Lỗi: Mã ID này đã có người sử dụng trong hệ thống. Vui lòng chọn một ID khác!"); return; }
-
-            const btn = document.getElementById('btn-submit-register'); btn.innerText = "Đang tối ưu ảnh và gửi hồ sơ..."; btn.disabled = true;
+            const btn = document.getElementById('btn-submit-register'); btn.innerText = "Đang gửi hồ sơ..."; btn.disabled = true;
 
             try {
-                // Tải ảnh lên ImgBB
                 let uploadedImageUrls = []; const IMGBB_API_KEY = "d9bfbfa59f386106cc48b03372be9eb1"; 
                 for (let i = 0; i < imageFiles.length; i++) {
                     const optimizedFile = await compressImage(imageFiles[i]); const formData = new FormData(); formData.append("image", optimizedFile);
                     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                    const result = await response.json(); if(result.success) uploadedImageUrls.push(result.data.url); else throw new Error("Lỗi lưu trữ ảnh");
+                    const result = await response.json(); if(result.success) uploadedImageUrls.push(result.data.url); else throw new Error("Lỗi ảnh");
                 }
 
-                // GỬI VÀO PHÒNG CHỜ (pending_registrations)
-                const registrationData = {
+                await addDoc(collection(db, "pending_registrations"), {
                     timestamp: Date.now(),
                     ownerInfo: { name: ownerName, phone: ownerPhone, loginId: loginId },
                     carInfo: { ownerId: loginId, brand: brand, name: name, fuel: fuel, transmission: transmission, bodyType: bodyType, seats: parseInt(seats), price: price, securityDeposit: securityDeposit, depositType: depositType, images: uploadedImageUrls }
-                };
-
-                await addDoc(collection(db, "pending_registrations"), registrationData);
-                // GỬI TELEGRAM BÁO ĐĂNG KÝ
+                });
+                
                 await window.sendTelegramNotification(`📝 <b>CÓ CHỦ XE ĐĂNG KÝ MỚI!</b>\n👤 Tên: <b>${ownerName}</b>\n📞 SĐT: <b>${ownerPhone}</b>\n🔑 ID: <b>${loginId}</b>\n🚗 Xe: <b>${brand} ${name}</b>`);
-                alert("Đăng ký thành công! Vui lòng chờ Quản lý duyệt hồ sơ để bắt đầu hoạt động.");
-                window.closeRegisterModal();
-                
-                // Reset form
-                document.getElementById('regOwnerName').value = ''; document.getElementById('regOwnerPhone').value = ''; document.getElementById('regOwnerId').value = '';
-                document.getElementById('regCarName').value = ''; document.getElementById('regCarPrice').value = ''; document.getElementById('regCarSecurityDeposit').value = ''; document.getElementById('regCarImages').value = '';
-                
-            } catch (error) { 
-                console.error(error); alert("Có lỗi mạng xảy ra khi gửi hồ sơ!"); 
-            } finally { 
-                btn.innerText = "Gửi Hồ Sơ Đăng Ký"; btn.disabled = false; 
-            }
+                alert("Đăng ký thành công! Chờ Quản lý duyệt."); window.closeRegisterModal();
+            } catch (error) { console.error(error); alert("Lỗi gửi hồ sơ!"); } finally { btn.innerText = "Gửi Hồ Sơ"; btn.disabled = false; }
         }
 
         window.addCar = async function() {
@@ -272,55 +253,17 @@
                 for (let i = 0; i < imageFiles.length; i++) { const optimizedFile = await compressImage(imageFiles[i]); const formData = new FormData(); formData.append("image", optimizedFile); const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData }); const result = await response.json(); if(result.success) uploadedImageUrls.push(result.data.url); else throw new Error("Lỗi API"); }
                 await addDoc(collection(db, "cars"), { ownerId: currentOwnerId, brand: brand, name: name, fuel: fuel, transmission: transmission, bodyType: bodyType, seats: parseInt(seats), price: price, securityDeposit: securityDeposit, depositType: depositType, images: uploadedImageUrls });
                 alert("Đăng xe thành công!"); window.closeAddCarModal();
-                // --- BẮT ĐẦU GỬI THÔNG BÁO TELEGRAM ĐĂNG KÝ CHỦ XE ---
-                const teleMessage = `
-📝 <b>CÓ YÊU CẦU ĐĂNG KÝ CHỦ XE MỚI!</b>
-👤 Tên đối tác: <b>${ownerName}</b>
-📞 SĐT: <b>${ownerPhone}</b>
-🔑 ID muốn đặt: <b>${loginId}</b>
-🚗 Xe khai báo: <b>${brand} ${name}</b>
-⚠️ <i>Vui lòng vào Trạm Quản Lý kiểm tra hồ sơ chờ duyệt!</i>
-                `;
-                await sendTelegramNotification(teleMessage);
-                // --- KẾT THÚC GỬI THÔNG BÁO TELEGRAM ---
             } catch (error) { console.error(error); alert("Lỗi tải ảnh!"); } finally { btn.innerText = "Đăng Xe"; btn.disabled = false; }
         }
 
-        // HÀM KHÓA LỊCH ĐÃ ĐƯỢC CHỈNH SỬA VÀ TRÌNH BÀY RÕ RÀNG
         window.blockCarSchedule = async function() {
-            const carId = document.getElementById('blockCarSelect').value; 
-            const startStr = document.getElementById('blockStartTime').value; 
-            const endStr = document.getElementById('blockEndTime').value;
-            
-            if(!carId || !startStr || !endStr) {
-                alert("Vui lòng chọn xe và đầy đủ thời gian để khóa lịch!");
-                return; 
-            }
-
-            const selectedCar = myCars.find(c => c.id === carId);
-            const carNameToSave = selectedCar ? selectedCar.name : "Khóa Lịch";
-
+            const carId = document.getElementById('blockCarSelect').value; const startStr = document.getElementById('blockStartTime').value; const endStr = document.getElementById('blockEndTime').value;
+            if(!carId || !startStr || !endStr) { alert("Chọn đủ giờ!"); return; }
+            const selectedCar = myCars.find(c => c.id === carId); const carNameToSave = selectedCar ? selectedCar.name : "Khóa Lịch";
             try { 
-                await addDoc(collection(db, "bookings"), { 
-                    timestamp: Date.now(), 
-                    carId: carId, 
-                    carName: carNameToSave, 
-                    customerName: "Chủ xe (Tự khóa)", 
-                    phone: currentOwnerId, 
-                    startTime: startStr, 
-                    endTime: endStr, 
-                    totalCost: 0, 
-                    status: 'Đã khóa lịch' 
-                }); 
-                
-                alert("Khóa lịch thành công!"); 
-                document.getElementById('blockStartTime').value = '';
-                document.getElementById('blockEndTime').value = '';
-                window.closeBlockScheduleModal(); 
-            } catch (error) { 
-                console.error(error); 
-                alert("Có lỗi kết nối, vui lòng thử lại!");
-            }
+                await addDoc(collection(db, "bookings"), { timestamp: Date.now(), carId: carId, carName: carNameToSave, customerName: "Chủ xe (Tự khóa)", phone: currentOwnerId, startTime: startStr, endTime: endStr, totalCost: 0, status: 'Đã khóa lịch' }); 
+                alert("Khóa lịch thành công!"); window.closeBlockScheduleModal(); 
+            } catch (error) { console.error(error); }
         }
 
         function formatDateTime(dateString) { const d = new Date(dateString); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; }
@@ -338,29 +281,39 @@
         }
 
         window.renderOwnerTable = function() {
-            if(!currentOwnerId) return; const myCarIds = myCars.filter(c => c.ownerId === currentOwnerId).map(c => c.id); const ownerBookings = globalBookings.filter(b => myCarIds.includes(b.carId)); ownerBookings.sort((a, b) => b.timestamp - a.timestamp);
+            if(!currentOwnerId) return; 
+            const myCarIds = myCars.filter(c => c.ownerId === currentOwnerId).map(c => c.id); 
+            const ownerBookings = globalBookings.filter(b => myCarIds.includes(b.carId)); 
+            ownerBookings.sort((a, b) => b.timestamp - a.timestamp);
             const tbody = document.getElementById('owner-table-body'); tbody.innerHTML = ''; 
+            
             ownerBookings.forEach(b => {
-                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'; const phoneDisplay = isConfirmed ? `<span class="text-gray-600">${b.phone}</span>` : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
-                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau'; const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-2 shadow-sm">🚗 Lộ trình: ${b.route}</span>` : '';
+                const isConfirmed = b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi'; 
+                const phoneDisplay = isConfirmed ? `<span class="text-gray-600">${b.phone}</span>` : `<span class="text-gray-400 italic">*** Chờ cọc ***</span>`;
+                const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau'; 
+                const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-2 shadow-sm">🚗 Lộ trình: ${b.route}</span>` : '';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
                 const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
+                
                 let financeHTML = `<span class="font-bold text-gray-500">Chưa có dữ liệu</span>`;
                 if (b.status !== 'Đã khóa lịch') {
                     const depositPaid = b.bookingDeposit || 200000; let remainingRental = b.totalCost - depositPaid; if (remainingRental < 0) remainingRental = 0;
                     const secDepAmount = b.securityDepositAmount || 0; let secText = b.securityMethod === 'money' ? `Tiền mặt (${secDepAmount.toLocaleString()}đ)` : `Xe máy (kèm cavet)`;
                     financeHTML = `<div class="text-sm">Thuê còn lại: <span class="font-bold text-red-600">${remainingRental.toLocaleString()}đ</span><br>Thế chân: <span class="font-bold text-yellow-600">${secText}</span></div>`;
                 }
-                // CÁC NÚT THAO TÁC CỦA CHỦ XE ĐÃ CẬP NHẬT TRẠNG THÁI MỚI
-                // CÁC NÚT THAO TÁC CỦA CHỦ XE
-            let btn = ''; 
-            if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}', ${b.totalCost})" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt & Báo Phí</button>`; 
-            else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở</button>`; 
-            else if (b.status === 'Chờ khách xác nhận') btn = `<span class="text-orange-600 text-sm font-semibold">Chờ khách chốt phí</span>`;
-            else if (b.status === 'Khách đã hủy') btn = `<span class="text-red-600 text-sm font-semibold">Khách hủy đơn</span>`;
-            else if (b.status === 'Đợi cọc') btn = `<span class="text-yellow-600 text-sm font-semibold">Chờ quản lý thu cọc</span>`;
-            else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-2 rounded mb-2 w-full text-sm font-bold shadow hover:bg-yellow-600 transition">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-700 text-white px-2 py-2 rounded w-full text-sm font-bold shadow hover:bg-gray-800 transition">Chốt đơn / Thu hồi</button>`;
-            else btn = `<span class="text-gray-500 text-sm font-semibold bg-gray-100 px-3 py-1 rounded">Hoàn tất</span>`;
+
+                let btn = ''; 
+                if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}', ${b.totalCost})" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt & Báo Phí</button>`; 
+                else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở Khóa</button>`; 
+                else if (b.status === 'Chờ khách xác nhận') btn = `<span class="text-orange-600 text-sm font-semibold">Chờ khách chốt phí</span>`;
+                else if (b.status === 'Khách đã hủy') btn = `<span class="text-red-600 text-sm font-semibold">Khách hủy đơn</span>`;
+                else if (b.status === 'Đợi cọc') btn = `<span class="text-yellow-600 text-sm font-semibold">Chờ quản lý thu cọc</span>`;
+                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-2 rounded mb-2 w-full text-sm font-bold shadow hover:bg-yellow-600 transition">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-700 text-white px-2 py-2 rounded w-full text-sm font-bold shadow hover:bg-gray-800 transition">Chốt đơn / Thu hồi</button>`;
+                else btn = `<span class="text-gray-500 text-sm font-semibold bg-gray-100 px-3 py-1 rounded">Hoàn tất</span>`;
+                
+                const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50 border-b' : 'border-b hover:bg-gray-50';
+                tbody.innerHTML += `<tr class="${rowClass}"><td class="py-3 px-4"><span class="font-bold text-blue-900 text-base">${b.carName}</span><br><span class="font-bold text-green-700">${b.customerName}</span><br>${b.status !== 'Đã khóa lịch' ? phoneDisplay : ''}</td><td class="py-3 px-4"><span class="font-semibold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-semibold text-red-600">Trả: ${formatDateTime(b.endTime)}</span>${addressDisplay}</td><td class="py-3 px-4">${financeHTML}</td><td class="py-3 px-4"><span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">${b.status}</span></td><td class="py-3 px-4 text-center">${btn}</td></tr>`;
+            });
         }
         
         window.renderMyCarsAndRevenue = function() {
@@ -372,50 +325,33 @@
             if(myOwnCars.length > 0) tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="4" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
         }
 
-        // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN (NÂNG CẤP)
-        // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN
-window.ownerApprove = async function(firebaseId, currentTotalCost) {
-    let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
-    if (feeInput === null) return; 
+        window.ownerApprove = async function(firebaseId, currentTotalCost) {
+            let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
+            if (feeInput === null) return; 
 
-    let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
-    if (isNaN(deliveryFee) || deliveryFee < 0) {
-        alert("Vui lòng nhập số tiền hợp lệ!"); return;
-    }
+            let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
+            if (isNaN(deliveryFee) || deliveryFee < 0) { alert("Vui lòng nhập số tiền hợp lệ!"); return; }
 
-    let newTotalCost = currentTotalCost + deliveryFee;
-    let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
+            let newTotalCost = currentTotalCost + deliveryFee;
+            let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
 
-    try {
-        await updateDoc(doc(db, "bookings", firebaseId), { 
-            status: newStatus,
-            deliveryFee: deliveryFee,
-            totalCost: newTotalCost
-        });
-        if(deliveryFee > 0) alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Chờ khách xác nhận!`);
-        else alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
-    } catch (error) {
-        console.error(error); alert("Lỗi khi duyệt đơn!");
-    }
-}
-        // HÀM XỬ LÝ MỞ KHÓA LỊCH CHO CHỦ XE
-        // Hàm này nhận vào ID của đơn khóa lịch trên Firebase và thực hiện xóa nó
+            try {
+                await updateDoc(doc(db, "bookings", firebaseId), { status: newStatus, deliveryFee: deliveryFee, totalCost: newTotalCost });
+                if(deliveryFee > 0) alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Chờ khách xác nhận!`);
+                else alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
+            } catch (error) { console.error(error); alert("Lỗi khi duyệt đơn!"); }
+        }
+
         window.unblockCar = async function(firebaseId) { 
-            // Bước 1: Hiển thị cảnh báo xác nhận để tránh bấm nhầm
-            if(confirm("Bạn có chắc chắn muốn mở khóa lịch cho khung giờ này không? Xe sẽ hiển thị trống trở lại trên trang web của khách hàng.")) { 
-                try { 
-                    // Bước 2: Gọi lệnh xóa dữ liệu (deleteDoc) từ Firebase
-                    await deleteDoc(doc(db, "bookings", firebaseId)); 
-                    alert("Mở khóa lịch thành công!"); 
-                } catch (error) { 
-                    // Bước 3: Bắt lỗi và thông báo nếu có sự cố mạng
-                    console.error("Lỗi khi mở khóa:", error); 
-                    alert("Có lỗi xảy ra, không thể mở khóa lúc này!"); 
-                } 
+            if(confirm("Mở khóa lịch cho khung giờ này?")) { 
+                try { await deleteDoc(doc(db, "bookings", firebaseId)); alert("Mở khóa lịch thành công!"); } 
+                catch (error) { console.error("Lỗi khi mở khóa:", error); } 
             } 
         }
+
         window.finishBooking = async function(firebaseId) { if(confirm("Xác nhận khách đã trả xe về bãi an toàn và kết thúc hợp đồng?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); } }
-        window.deleteCar = async function(carId, carName) { if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa xe "${carName}" không?`)) { try { await deleteDoc(doc(db, "cars", carId)); alert("Đã xóa xe thành công!"); } catch (error) { console.error(error); alert("Lỗi khi xóa xe!"); } } }
+        window.deleteCar = async function(carId, carName) { if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa xe "${carName}" không?`)) { try { await deleteDoc(doc(db, "cars", carId)); alert("Đã xóa xe thành công!"); } catch (error) { console.error(error); } } }
+        
         window.updateEndTime = function(firebaseId) { currentEditingId = firebaseId; document.getElementById('modal-update-time').classList.remove('hidden'); }
         window.closeUpdateModal = function() { document.getElementById('modal-update-time').classList.add('hidden'); currentEditingId = null; }
         document.getElementById('btn-save-time').addEventListener('click', async () => {
@@ -425,16 +361,6 @@ window.ownerApprove = async function(firebaseId, currentTotalCost) {
             let newTotalCost = rentalDays * carPrice; if(isFar) newTotalCost += (rentalDays * 200000);
             try { await updateDoc(doc(db, "bookings", currentEditingId), { endTime: newTime, totalCost: newTotalCost }); alert("Đã cập nhật!"); window.closeUpdateModal(); } catch(e) { console.error(e); }
         });
-            window.sendTelegramNotification = async function(message) {
-            const TELEGRAM_BOT_TOKEN = "8528480103:AAEQL1Q2MA4oJecYqo3Gqk9YTSJRgJ82bKE";
-            const TELEGRAM_CHAT_ID = "8903656612";
-            try {
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
-                });
-            } catch (error) { console.error("Lỗi Telegram:", error); }
-        }
     </script>
 </body>
 </html>

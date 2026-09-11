@@ -325,21 +325,39 @@
             if(myOwnCars.length > 0) tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="4" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
         }
 
+        // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN (CÓ GỬI TELEGRAM)
         window.ownerApprove = async function(firebaseId, currentTotalCost) {
             let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
             if (feeInput === null) return; 
 
             let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
-            if (isNaN(deliveryFee) || deliveryFee < 0) { alert("Vui lòng nhập số tiền hợp lệ!"); return; }
+            if (isNaN(deliveryFee) || deliveryFee < 0) {
+                alert("Vui lòng nhập số tiền hợp lệ!"); return;
+            }
 
             let newTotalCost = currentTotalCost + deliveryFee;
             let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
 
             try {
-                await updateDoc(doc(db, "bookings", firebaseId), { status: newStatus, deliveryFee: deliveryFee, totalCost: newTotalCost });
-                if(deliveryFee > 0) alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Chờ khách xác nhận!`);
-                else alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
-            } catch (error) { console.error(error); alert("Lỗi khi duyệt đơn!"); }
+                // 1. Cập nhật Firebase
+                await updateDoc(doc(db, "bookings", firebaseId), { 
+                    status: newStatus,
+                    deliveryFee: deliveryFee,
+                    totalCost: newTotalCost
+                });
+                
+                // 2. Tìm thông tin đơn và gửi Telegram
+                const b = globalBookings.find(x => x.firebaseId === firebaseId);
+                if(deliveryFee > 0) {
+                    await window.sendTelegramNotification(`⏳ <b>CHỦ XE YÊU CẦU PHỤ PHÍ</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b>\n💵 Phí giao nhận báo thêm: <b>+ ${deliveryFee.toLocaleString()}đ</b>\n⚠️ Hệ thống đang chờ khách chốt phí...`);
+                    alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Chờ khách xác nhận!`);
+                } else {
+                    await window.sendTelegramNotification(`✅ <b>CHỦ XE ĐÃ DUYỆT ĐƠN</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b>\n⚠️ Trạng thái: Đợi cọc`);
+                    alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
+                }
+            } catch (error) {
+                console.error(error); alert("Lỗi khi duyệt đơn!");
+            }
         }
 
         window.unblockCar = async function(firebaseId) { 
@@ -349,17 +367,38 @@
             } 
         }
 
-        window.finishBooking = async function(firebaseId) { if(confirm("Xác nhận khách đã trả xe về bãi an toàn và kết thúc hợp đồng?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); } }
+        window.finishBooking = async function(firebaseId) { 
+            if(confirm("Xác nhận khách đã trả xe về bãi an toàn và kết thúc hợp đồng?")) { 
+                try {
+                    await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); 
+                    const b = globalBookings.find(x => x.firebaseId === firebaseId);
+                    await window.sendTelegramNotification(`🏁 <b>ĐƠN HÀNG HOÀN TẤT</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b>\n📍 Chủ xe đã xác nhận thu hồi xe an toàn.`);
+                    alert("Đã chốt đơn và thu hồi xe!");
+                } catch(error) { console.error(error); }
+            } 
+        }
         window.deleteCar = async function(carId, carName) { if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa xe "${carName}" không?`)) { try { await deleteDoc(doc(db, "cars", carId)); alert("Đã xóa xe thành công!"); } catch (error) { console.error(error); } } }
         
         window.updateEndTime = function(firebaseId) { currentEditingId = firebaseId; document.getElementById('modal-update-time').classList.remove('hidden'); }
         window.closeUpdateModal = function() { document.getElementById('modal-update-time').classList.add('hidden'); currentEditingId = null; }
         document.getElementById('btn-save-time').addEventListener('click', async () => {
-            const newTime = document.getElementById('newEndTime').value; if(!newTime) { alert("Vui lòng chọn giờ trả xe thực tế!"); return; }
-            const b = globalBookings.find(doc => doc.firebaseId === currentEditingId); let isFar = false; if (b.route && b.route.includes("Đi xa")) isFar = true;
-            const carPrice = myCars.find(c => c.id === b.carId).price; const rentalDays = calculateRentalData(b.startTime, newTime).days;
-            let newTotalCost = rentalDays * carPrice; if(isFar) newTotalCost += (rentalDays * 200000);
-            try { await updateDoc(doc(db, "bookings", currentEditingId), { endTime: newTime, totalCost: newTotalCost }); alert("Đã cập nhật!"); window.closeUpdateModal(); } catch(e) { console.error(e); }
+            const newTime = document.getElementById('newEndTime').value; 
+            if(!newTime) { alert("Vui lòng chọn giờ trả xe thực tế!"); return; }
+            
+            const b = globalBookings.find(doc => doc.firebaseId === currentEditingId); 
+            let isFar = false; if (b.route && b.route.includes("Đi xa")) isFar = true;
+            
+            const carPrice = myCars.find(c => c.id === b.carId).price; 
+            const rentalDays = calculateRentalData(b.startTime, newTime).days;
+            let newTotalCost = rentalDays * carPrice; 
+            if(isFar) newTotalCost += (rentalDays * 200000);
+            
+            try { 
+                await updateDoc(doc(db, "bookings", currentEditingId), { endTime: newTime, totalCost: newTotalCost }); 
+                await window.sendTelegramNotification(`⏱️ <b>ĐỔI LỊCH / TRẢ MUỘN</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b>\n📅 Giờ trả mới: <b>${newTime}</b>\n💰 Tổng tiền mới: <b>${newTotalCost.toLocaleString()}đ</b>`);
+                alert("Đã cập nhật!"); 
+                window.closeUpdateModal(); 
+            } catch(error) { console.error(error); }
         });
     </script>
 </body>

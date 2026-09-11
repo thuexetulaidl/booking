@@ -113,7 +113,7 @@
     <!-- JAVASCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBIVpGGE6zKxKkT6R7SUdgB5TLA9Dtfdlk",
@@ -266,16 +266,42 @@
         // HÀM XỬ LÝ KHÁCH HÀNG ĐỒNG Ý PHỤ PHÍ
         window.acceptFee = async function(firebaseId) {
             if(confirm("Xác nhận ĐỒNG Ý với mức phụ phí này và tiến hành thuê xe?")) {
-                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' });
-                alert("Xác nhận thành công! Vui lòng chờ bộ phận Quản lý liên hệ để thu cọc.");
+                try {
+                    // 1. Cập nhật cơ sở dữ liệu
+                    await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' });
+                    
+                    // 2. Bắn thông báo Telegram cho Admin
+                    const b = globalBookings.find(doc => doc.firebaseId === firebaseId);
+                    await window.sendTelegramNotification(`✅ <b>KHÁCH ĐÃ ĐỒNG Ý PHỤ PHÍ</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b> (${b.phone})\n💰 Trạng thái đơn: <b>Đợi cọc</b>`);
+                    
+                    // 3. Thông báo và làm mới giao diện
+                    alert("Xác nhận thành công! Vui lòng chờ bộ phận Quản lý liên hệ để thu cọc.");
+                    window.trackOrder(); 
+                } catch(error) { 
+                    console.error("Lỗi:", error); 
+                    alert("Có lỗi kết nối, vui lòng thử lại!"); 
+                }
             }
         }
 
         // HÀM XỬ LÝ KHÁCH HÀNG HỦY ĐƠN
         window.cancelBooking = async function(firebaseId) {
             if(confirm("Bạn chắc chắn muốn HỦY đơn đặt xe này?")) {
-                await updateDoc(doc(db, "bookings", firebaseId), { status: 'Khách đã hủy' });
-                alert("Đơn đặt xe đã được hủy thành công.");
+                try {
+                    // 1. Cập nhật cơ sở dữ liệu
+                    await updateDoc(doc(db, "bookings", firebaseId), { status: 'Khách đã hủy' });
+                    
+                    // 2. Bắn thông báo Telegram cho Admin
+                    const b = globalBookings.find(doc => doc.firebaseId === firebaseId);
+                    await window.sendTelegramNotification(`❌ <b>KHÁCH ĐÃ HỦY ĐƠN</b>\n🚗 Xe: <b>${b.carName}</b>\n👤 Khách: <b>${b.customerName}</b> (${b.phone})\n⚠️ Trạng thái đơn: <b>Khách đã hủy</b>`);
+                    
+                    // 3. Thông báo và làm mới giao diện
+                    alert("Đơn đặt xe đã được hủy thành công.");
+                    window.trackOrder(); 
+                } catch(error) { 
+                    console.error("Lỗi:", error); 
+                    alert("Có lỗi kết nối, vui lòng thử lại!"); 
+                }
             }
         }
         function calculateRentalData(startStr, endStr, carPrice = 0, isFar = false) {

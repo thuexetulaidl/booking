@@ -281,13 +281,39 @@
             });
         }
         
-        window.renderMyCarsAndRevenue = function() {
-            if(!currentOwnerId) return; const myOwnCars = myCars.filter(c => c.ownerId === currentOwnerId); const tbody = document.getElementById('my-cars-table-body'); tbody.innerHTML = ''; let totalRevenueAllCars = 0;
+       window.renderMyCarsAndRevenue = function() {
+            if(!currentOwnerId) return; 
+            const myOwnCars = myCars.filter(c => c.ownerId === currentOwnerId); 
+            const tbody = document.getElementById('my-cars-table-body'); 
+            tbody.innerHTML = ''; 
+            let totalRevenueAllCars = 0;
+            
             myOwnCars.forEach(car => {
-                const carBookings = globalBookings.filter(b => b.carId === car.id && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi')); const totalRevenue = carBookings.reduce((sum, b) => sum + b.totalCost, 0); totalRevenueAllCars += totalRevenue;
-                tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4 font-bold text-blue-900">${car.name} <br><span class="text-xs text-gray-400 font-normal">Hãng: ${car.brand} - ${car.seats} chỗ</span></td><td class="py-3 px-4 font-semibold text-gray-700">${car.price.toLocaleString()}đ</td><td class="py-3 px-4 font-bold text-indigo-600">${carBookings.length} lượt</td><td class="py-3 px-4 font-bold text-red-500">${totalRevenue.toLocaleString()}đ</td></tr>`;
+                const carBookings = globalBookings.filter(b => b.carId === car.id && (b.status === 'Đã xác nhận' || b.status === 'Đã thu hồi')); 
+                const totalRevenue = carBookings.reduce((sum, b) => sum + b.totalCost, 0); 
+                totalRevenueAllCars += totalRevenue;
+                
+                // Thêm thẻ <td> chứa nút Xóa ở cuối
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 font-bold text-blue-900">${car.name} <br><span class="text-xs text-gray-400 font-normal">Hãng: ${car.brand} - ${car.seats} chỗ</span></td>
+                        <td class="py-3 px-4 font-semibold text-gray-700">${car.price.toLocaleString()}đ</td>
+                        <td class="py-3 px-4 font-bold text-indigo-600">${carBookings.length} lượt</td>
+                        <td class="py-3 px-4 font-bold text-red-500">${totalRevenue.toLocaleString()}đ</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="window.deleteCar('${car.id}', '${car.name}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm font-bold shadow hover:bg-red-600">Xóa Xe</button>
+                        </td>
+                    </tr>`;
             });
-            if(myOwnCars.length > 0) tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="3" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
+            
+            if(myOwnCars.length > 0) {
+                // Sửa colspan="3" thành colspan="4" để chữ "Tổng Doanh Thu" dịch sang đúng cột
+                tbody.innerHTML += `
+                    <tr class="bg-purple-100">
+                        <td colspan="4" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td>
+                        <td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td>
+                    </tr>`;
+            }
         }
 
         window.ownerApprove = async function(firebaseId) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' }); }

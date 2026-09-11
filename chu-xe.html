@@ -339,6 +339,22 @@
         }
 
         window.ownerApprove = async function(firebaseId) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' }); }
+        // HÀM XỬ LÝ MỞ KHÓA LỊCH CHO CHỦ XE
+        // Hàm này nhận vào ID của đơn khóa lịch trên Firebase và thực hiện xóa nó
+        window.unblockCar = async function(firebaseId) { 
+            // Bước 1: Hiển thị cảnh báo xác nhận để tránh bấm nhầm
+            if(confirm("Bạn có chắc chắn muốn mở khóa lịch cho khung giờ này không? Xe sẽ hiển thị trống trở lại trên trang web của khách hàng.")) { 
+                try { 
+                    // Bước 2: Gọi lệnh xóa dữ liệu (deleteDoc) từ Firebase
+                    await deleteDoc(doc(db, "bookings", firebaseId)); 
+                    alert("Mở khóa lịch thành công!"); 
+                } catch (error) { 
+                    // Bước 3: Bắt lỗi và thông báo nếu có sự cố mạng
+                    console.error("Lỗi khi mở khóa:", error); 
+                    alert("Có lỗi xảy ra, không thể mở khóa lúc này!"); 
+                } 
+            } 
+        }
         window.finishBooking = async function(firebaseId) { if(confirm("Xác nhận khách đã trả xe về bãi an toàn và kết thúc hợp đồng?")) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đã thu hồi' }); } }
         window.deleteCar = async function(carId, carName) { if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa xe "${carName}" không?`)) { try { await deleteDoc(doc(db, "cars", carId)); alert("Đã xóa xe thành công!"); } catch (error) { console.error(error); alert("Lỗi khi xóa xe!"); } } }
         window.updateEndTime = function(firebaseId) { currentEditingId = firebaseId; document.getElementById('modal-update-time').classList.remove('hidden'); }

@@ -209,24 +209,35 @@
 
         window.renderManagerTable = function() {
             const tbody = document.getElementById('manager-table-body'); tbody.innerHTML = '';
+            
             globalBookings.forEach(b => {
                 const rentalDays = calculateRentalData(b.startTime, b.endTime).days;
                 const delAdd = b.deliveryAddress ? b.deliveryAddress : 'Báo sau'; const retAdd = b.returnAddress ? b.returnAddress : 'Báo sau';
                 const routeDisplay = b.route ? `<br><span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded inline-block mt-1">🚗 ${b.route}</span>` : '';
                 const addressDisplay = b.status !== 'Đã khóa lịch' ? `<br><span class="text-gray-600 text-xs">Giao: ${delAdd}</span><br><span class="text-gray-600 text-xs">Trả: ${retAdd}</span>${routeDisplay}` : '';
 
+                // BỔ SUNG PHỤ PHÍ VÀO CỘT TÀI CHÍNH CỦA QUẢN LÝ
                 const depositAmount = b.bookingDeposit || 200000; const secDepAmount = b.securityDepositAmount || 0;
                 let secText = b.securityMethod === 'money' ? `Tiền mặt (${secDepAmount.toLocaleString()}đ)` : `Xe máy (kèm cavet)`;
-                let financeHTML = `<span class="font-bold text-red-500 text-base">${b.totalCost.toLocaleString()}đ</span>`;
                 
-                if (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc') {
-                    financeHTML += `<br><span class="text-xs text-blue-600 font-bold">Mức cọc: ${depositAmount.toLocaleString()}đ</span>`;
-                    if (b.status === 'Đã xác nhận') { let remaining = b.totalCost - depositAmount; financeHTML += `<br><span class="text-xs text-red-600 font-bold">Tiền thuê còn lại: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`; }
+                let deliveryFeeHTML = '';
+                if (b.deliveryFee && b.deliveryFee > 0) {
+                    deliveryFeeHTML = `<br><span class="text-xs text-orange-600 font-bold bg-orange-50 px-1 rounded">Phí giao nhận: ${b.deliveryFee.toLocaleString()}đ</span>`;
                 }
-                if (b.status !== 'Đã khóa lịch') financeHTML += `<br><span class="text-xs text-yellow-600 font-bold bg-yellow-50 px-1 rounded mt-1 inline-block">Thế chân: ${secText}</span>`;
 
+                let financeHTML = `<span class="font-black text-red-600 text-base">Tổng: ${b.totalCost.toLocaleString()}đ</span>${deliveryFeeHTML}`;
+                
+                if (b.status === 'Đã xác nhận' || b.status === 'Đợi cọc' || b.status === 'Chờ khách xác nhận') {
+                    financeHTML += `<br><span class="text-xs text-blue-600 font-bold">Mức cọc: ${depositAmount.toLocaleString()}đ</span>`;
+                    if (b.status === 'Đã xác nhận') { let remaining = b.totalCost - depositAmount; financeHTML += `<br><span class="text-xs text-red-600 font-bold">Thuê còn lại: ${remaining > 0 ? remaining.toLocaleString() : 0}đ</span>`; }
+                }
+                if (b.status !== 'Đã khóa lịch' && b.status !== 'Khách đã hủy') financeHTML += `<br><span class="text-xs text-yellow-600 font-bold bg-yellow-50 px-1 rounded mt-1 inline-block">Thế chân: ${secText}</span>`;
+
+                // CÁC NÚT THAO TÁC CỦA QUẢN LÝ
                 let btn = '';
                 if (b.status === 'Chờ chủ xe duyệt') btn = '<span class="text-gray-500 text-sm italic">Đợi chủ xe duyệt...</span>';
+                else if (b.status === 'Chờ khách xác nhận') btn = '<span class="text-orange-600 text-sm font-bold animate-pulse">Khách đang chốt phí...</span>';
+                else if (b.status === 'Khách đã hủy') btn = '<span class="text-red-500 text-sm font-black bg-red-100 px-3 py-1 rounded shadow-sm border border-red-200">Đơn đã hủy</span>';
                 else if (b.status === 'Đợi cọc') btn = `<button onclick="window.confirmDeposit('${b.firebaseId}')" class="bg-green-500 text-white px-3 py-2 rounded w-full text-sm font-bold shadow hover:scale-105 transition">Xác nhận thu cọc<br>(${depositAmount.toLocaleString()}đ)</button>`;
                 else if (b.status === 'Đã xác nhận') btn = '<span class="text-blue-600 text-sm font-bold bg-blue-50 px-3 py-1 rounded border border-blue-200 block text-center">Chờ chủ xe thu hồi</span>';
                 else btn = '<span class="text-gray-400 text-sm font-semibold">Đã kết thúc</span>';

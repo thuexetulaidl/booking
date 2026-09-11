@@ -110,8 +110,19 @@
     <!-- MODAL TỰ KHÓA LỊCH -->
     <div id="modal-block-schedule" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
-            <div class="bg-yellow-600 p-4 flex justify-between items-center"><h2 class="text-xl font-bold text-white">Tự khóa lịch bận</h2><button onclick="window.closeBlockScheduleModal()" class="text-white font-bold text-2xl">&times;</button></div>
-            <div class="p-6">
+            <table class="min-w-full bg-white text-sm">
+    <thead class="bg-purple-800 text-white">
+        <tr>
+            <th class="py-3 px-4 text-left">Tên Xe (Đã đăng)</th>
+            <th class="py-3 px-4 text-left">Giá Thuê (Ngày)</th>
+            <th class="py-3 px-4 text-left">Số Lượt Thuê</th>
+            <th class="py-3 px-4 text-left">Doanh Thu Tạm Tính</th>
+            <!-- CỘT MỚI ĐƯỢC THÊM VÀO ĐÂY -->
+            <th class="py-3 px-4 text-center">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody id="my-cars-table-body"></tbody>
+</table>
                 <div class="flex flex-col gap-4 mb-6">
                     <select id="blockCarSelect" class="border p-3 rounded bg-white w-full"><option value="">-- Chọn xe --</option></select>
                     <input type="text" id="blockStartTime" class="border p-3 rounded w-full" placeholder="Từ ngày giờ...">

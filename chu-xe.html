@@ -315,6 +315,19 @@
                     </tr>`;
             }
         }
+        // HÀM XỬ LÝ XÓA XE KHỎI HỆ THỐNG
+        window.deleteCar = async function(carId, carName) {
+            // Hiển thị hộp thoại hỏi lại để tránh chủ xe lỡ tay bấm nhầm
+            if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa xe "${carName}" không?\n\nLưu ý: Xe sẽ bị gỡ khỏi danh sách cho thuê, nhưng các lịch sử đơn hàng cũ vẫn được giữ lại.`)) {
+                try {
+                    await deleteDoc(doc(db, "cars", carId));
+                    alert("Đã xóa xe thành công!");
+                } catch (error) { 
+                    console.error("Lỗi khi xóa xe:", error); 
+                    alert("Có lỗi xảy ra, không thể xóa xe lúc này!"); 
+                }
+            }
+        }
 
         window.ownerApprove = async function(firebaseId) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' }); }
         window.unblockCar = async function(firebaseId) { if(confirm("Mở khóa lịch cho khung giờ này?")) { try { await deleteDoc(doc(db, "bookings", firebaseId)); alert("Mở khóa thành công!"); } catch (error) { console.error(error); } } }

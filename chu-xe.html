@@ -323,7 +323,15 @@
                     const secDepAmount = b.securityDepositAmount || 0; let secText = b.securityMethod === 'money' ? `Tiền mặt (${secDepAmount.toLocaleString()}đ)` : `Xe máy (kèm cavet)`;
                     financeHTML = `<div class="text-sm">Thuê còn lại: <span class="font-bold text-red-600">${remainingRental.toLocaleString()}đ</span><br>Thế chân: <span class="font-bold text-yellow-600">${secText}</span></div>`;
                 }
-                let btn = ''; if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}')" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt</button>`; else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở</button>`; else if (b.status === 'Đợi cọc') btn = `<span class="text-yellow-600 text-sm font-semibold">Chờ quản lý thu cọc</span>`; else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-2 rounded mb-2 w-full text-sm font-bold shadow hover:bg-yellow-600 transition">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-700 text-white px-2 py-2 rounded w-full text-sm font-bold shadow hover:bg-gray-800 transition">Chốt đơn / Thu hồi</button>`; else btn = `<span class="text-gray-500 text-sm font-semibold bg-gray-100 px-3 py-1 rounded">Hoàn tất</span>`;
+                // CÁC NÚT THAO TÁC CỦA CHỦ XE ĐÃ CẬP NHẬT TRẠNG THÁI MỚI
+                let btn = ''; 
+                if (b.status === 'Chờ chủ xe duyệt') btn = `<button onclick="window.ownerApprove('${b.firebaseId}', ${b.totalCost})" class="bg-blue-500 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-blue-600">Duyệt & Báo Phí</button>`; 
+                else if (b.status === 'Đã khóa lịch') btn = `<button onclick="window.unblockCar('${b.firebaseId}')" class="bg-gray-700 text-white px-3 py-1 rounded w-full font-bold shadow hover:bg-gray-800">Mở</button>`; 
+                else if (b.status === 'Chờ khách xác nhận') btn = `<span class="text-orange-600 text-sm font-semibold">Chờ khách chốt phí</span>`;
+                else if (b.status === 'Khách đã hủy') btn = `<span class="text-red-600 text-sm font-semibold">Khách hủy đơn</span>`;
+                else if (b.status === 'Đợi cọc') btn = `<span class="text-yellow-600 text-sm font-semibold">Chờ quản lý thu cọc</span>`;
+                else if (b.status === 'Đã xác nhận') btn = `<button onclick="window.updateEndTime('${b.firebaseId}')" class="bg-yellow-500 text-white px-2 py-2 rounded mb-2 w-full text-sm font-bold shadow hover:bg-yellow-600 transition">Khách trả muộn</button><button onclick="window.finishBooking('${b.firebaseId}')" class="bg-gray-700 text-white px-2 py-2 rounded w-full text-sm font-bold shadow hover:bg-gray-800 transition">Chốt đơn / Thu hồi</button>`;
+                else btn = `<span class="text-gray-500 text-sm font-semibold bg-gray-100 px-3 py-1 rounded">Hoàn tất</span>`;
                 const rowClass = b.status === 'Đã khóa lịch' ? 'bg-yellow-50 border-b' : 'border-b hover:bg-gray-50';
                 tbody.innerHTML += `<tr class="${rowClass}"><td class="py-3 px-4"><span class="font-bold text-blue-900 text-base">${b.carName}</span><br><span class="font-bold text-green-700">${b.customerName}</span><br>${b.status !== 'Đã khóa lịch' ? phoneDisplay : ''}</td><td class="py-3 px-4"><span class="font-semibold text-gray-800">Lấy: ${formatDateTime(b.startTime)}</span><br><span class="font-semibold text-red-600">Trả: ${formatDateTime(b.endTime)}</span>${addressDisplay}</td><td class="py-3 px-4">${financeHTML}</td><td class="py-3 px-4"><span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">${b.status}</span></td><td class="py-3 px-4 text-center">${btn}</td></tr>`;
             });
@@ -338,7 +346,41 @@
             if(myOwnCars.length > 0) tbody.innerHTML += `<tr class="bg-purple-100"><td colspan="4" class="py-4 px-4 font-black text-right text-purple-900 text-lg uppercase">Tổng Doanh Thu:</td><td class="py-4 px-4 font-black text-red-600 text-xl">${totalRevenueAllCars.toLocaleString()}đ</td></tr>`;
         }
 
-        window.ownerApprove = async function(firebaseId) { await updateDoc(doc(db, "bookings", firebaseId), { status: 'Đợi cọc' }); }
+        // HÀM DUYỆT ĐƠN VÀ BÁO PHÍ GIAO NHẬN (NÂNG CẤP)
+        window.ownerApprove = async function(firebaseId, currentTotalCost) {
+            // Hiện hộp thoại cho phép chủ xe nhập phụ phí
+            let feeInput = prompt("Nhập phụ phí giao/nhận xe xa (VNĐ).\nNhập số 0 nếu miễn phí giao nhận:", "0");
+            
+            if (feeInput === null) return; // Nếu chủ xe bấm Hủy thì dừng lại
+
+            // Lọc bỏ dấu phẩy/chấm nếu chủ xe gõ (VD: 200,000)
+            let deliveryFee = parseInt(feeInput.replace(/,/g, '').replace(/\./g, ''));
+            
+            if (isNaN(deliveryFee) || deliveryFee < 0) {
+                alert("Vui lòng nhập số tiền hợp lệ!"); return;
+            }
+
+            // Cộng phụ phí vào tổng tiền
+            let newTotalCost = currentTotalCost + deliveryFee;
+            // Xác định trạng thái tiếp theo
+            let newStatus = deliveryFee > 0 ? 'Chờ khách xác nhận' : 'Đợi cọc';
+
+            try {
+                await updateDoc(doc(db, "bookings", firebaseId), { 
+                    status: newStatus,
+                    deliveryFee: deliveryFee,
+                    totalCost: newTotalCost
+                });
+                
+                if(deliveryFee > 0) {
+                    alert(`Đã cộng thêm ${deliveryFee.toLocaleString()}đ phụ phí. Hệ thống đang chờ khách hàng xác nhận!`);
+                } else {
+                    alert("Đã duyệt đơn thành công! Chờ quản lý thu cọc.");
+                }
+            } catch (error) {
+                console.error(error); alert("Lỗi khi duyệt đơn!");
+            }
+        }
         // HÀM XỬ LÝ MỞ KHÓA LỊCH CHO CHỦ XE
         // Hàm này nhận vào ID của đơn khóa lịch trên Firebase và thực hiện xóa nó
         window.unblockCar = async function(firebaseId) { 

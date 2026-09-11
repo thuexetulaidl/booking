@@ -438,6 +438,10 @@
 
             try {
                 await addDoc(collection(db, "bookings"), newBooking);
+                // GỬI TELEGRAM BÁO ĐƠN ĐẶT XE
+                const ownerAlert = pendingCarSelection.ownerId === '679195' ? "⭐ CÓ KHÁCH ĐẶT XE CỦA BẠN (679195)!" : `🔔 CÓ KHÁCH ĐẶT XE (Chủ xe: ${pendingCarSelection.ownerId})`;
+                const teleMsg = `${ownerAlert}\n🚗 Xe: <b>${pendingCarSelection.name}</b>\n👤 Khách: <b>${name}</b>\n📞 SĐT: <b>${phone}</b>\n💰 Tổng tiền: <b>${rentalData.totalCost.toLocaleString()}đ</b>`;
+                await window.sendTelegramNotification(teleMsg);
                 // --- BẮT ĐẦU GỬI THÔNG BÁO TELEGRAM ---
                 // Phân biệt xe của Admin (679195) và xe của người khác
                 const ownerAlertText = pendingCarSelection.ownerId === '679195' 
@@ -461,6 +465,16 @@ ${ownerAlertText}
                 window.closeModal(); alert("Đặt xe thành công! Bạn có thể sử dụng SĐT vừa nhập để tra cứu tình trạng đơn hàng.");
             } catch (error) { console.error("Lỗi:", error); alert("Có lỗi xảy ra, vui lòng thử lại!");
             } finally { document.getElementById('btn-submit').innerText = "Xác nhận Đặt"; document.getElementById('btn-submit').disabled = false; }
+        }
+        window.sendTelegramNotification = async function(message) {
+            const TELEGRAM_BOT_TOKEN = "8528480103:AAEQL1Q2MA4oJecYqo3Gqk9YTSJRgJ82bKE";
+            const TELEGRAM_CHAT_ID = "8903656612";
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
+                });
+            } catch (error) { console.error("Lỗi Telegram:", error); }
         }
     </script>
 </body>
